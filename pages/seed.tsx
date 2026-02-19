@@ -68,8 +68,8 @@ const CLIENTES = [
 ];
 
 const SEMANAS = [
-  { id: 'SEM-07-EM', proyecto: 'EM26-01', cliente: 'Eurospec Mfg.', planta: 'Fisher Dynamics', semana: 'Sem 07', fechaInicio: '2026-02-09', fechaFin: '2026-02-14', supervisor: 'A. Serrano', dias: 5, horas: 40, tarifa: '$40', total: 1600, estado: 'Lista para Facturar', pod: true, reporte: true, firma: true, oc: true },
-  { id: 'SEM-06-EM', proyecto: 'EM26-01', cliente: 'Eurospec Mfg.', planta: 'Fisher Dynamics', semana: 'Sem 06', fechaInicio: '2026-02-02', fechaFin: '2026-02-07', supervisor: 'A. Serrano', dias: 5, horas: 40, tarifa: '$40', total: 1600, estado: 'Facturada', pod: true, reporte: true, firma: true, oc: true },
+  { id: 'SEM-07-EM', semana: 'Sem 07', rango: '09 Feb — 14 Feb', proyecto: 'EM26-01', cliente: 'Eurospec Mfg.', planta: 'Fisher Dynamics', supervisor: 'A. Serrano', diasTrabajados: 5, horasTotal: 40, inspeccionadas: 1944, ok: 1900, nok: 44, tasaNok: '2.26%', estado: 'Lista para Facturar', ec: '#10B981', eb: '#ECFDF5', monto: '$1,600', oc: 'PO-31764', pod: true, reporte: true, firma: true },
+  { id: 'SEM-06-EM', semana: 'Sem 06', rango: '02 Feb — 07 Feb', proyecto: 'EM26-01', cliente: 'Eurospec Mfg.', planta: 'Fisher Dynamics', supervisor: 'A. Serrano', diasTrabajados: 5, horasTotal: 40, inspeccionadas: 1920, ok: 1915, nok: 5, tasaNok: '0.26%', estado: 'Facturada', ec: '#059669', eb: '#ECFDF5', monto: '$1,600', oc: 'PO-31764', pod: true, reporte: true, firma: true },
 ];
 
 const INSPECCIONES = [
