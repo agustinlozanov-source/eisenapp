@@ -67,6 +67,24 @@ const CLIENTES = [
   },
 ];
 
+const SEMANAS = [
+  { id: 'SEM-07-EM', proyecto: 'EM26-01', cliente: 'Eurospec Mfg.', planta: 'Fisher Dynamics', semana: 'Sem 07', fechaInicio: '2026-02-09', fechaFin: '2026-02-14', supervisor: 'A. Serrano', dias: 5, horas: 40, tarifa: '$40', total: 1600, estado: 'Lista para Facturar', pod: true, reporte: true, firma: true, oc: true },
+  { id: 'SEM-06-EM', proyecto: 'EM26-01', cliente: 'Eurospec Mfg.', planta: 'Fisher Dynamics', semana: 'Sem 06', fechaInicio: '2026-02-02', fechaFin: '2026-02-07', supervisor: 'A. Serrano', dias: 5, horas: 40, tarifa: '$40', total: 1600, estado: 'Facturada', pod: true, reporte: true, firma: true, oc: true },
+];
+
+const INSPECCIONES = [
+  { id: 'INS-001', proyecto: 'EM26-01', cliente: 'Eurospec Mfg.', planta: 'Fisher Dynamics', fecha: '2026-02-14', supervisor: 'A. Serrano', turno: 'Matutino', total: 1944, ok: 1900, nok: 44, tasaNok: '2.26%', firma: true, semana: 'Sem 07' },
+  { id: 'INS-002', proyecto: 'EM26-01', cliente: 'Eurospec Mfg.', planta: 'Fisher Dynamics', fecha: '2026-02-13', supervisor: 'A. Serrano', turno: 'Matutino', total: 1920, ok: 1915, nok: 5, tasaNok: '0.26%', firma: true, semana: 'Sem 07' },
+];
+
+const FACTURAS = [
+  { id: 'FAC-001', proyecto: 'EM26-01', cliente: 'Eurospec Mfg.', semana: 'Sem 06', fechaEmision: '2026-02-10', fechaVencimiento: '2026-03-11', horas: 40, tarifa: '$40', total: 1600, estado: 'Enviada', oc: 'PO-31764' },
+];
+
+const PAGOS = [
+  { id: 'PAG-001', factura: 'FAC-001', cliente: 'Eurospec Mfg.', proyecto: 'EM26-01', monto: 1600, fechaEsperada: '2026-03-11', estado: 'Pendiente', metodo: 'Wire Transfer' },
+];
+
 export default function Seed() {
   const [log, setLog]       = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
@@ -91,6 +109,34 @@ export default function Seed() {
       for (const cliente of CLIENTES) {
         await setDoc(doc(db, 'clientes', cliente.id), cliente);
         addLog(`✓ Cliente ${cliente.id} — ${cliente.nombre}`);
+      }
+
+      // Seed semanas
+      addLog('Creando semanas...');
+      for (const semana of SEMANAS) {
+        await setDoc(doc(db, 'semanas', semana.id), semana);
+        addLog(`✓ Semana ${semana.id} — ${semana.semana}`);
+      }
+
+      // Seed inspecciones
+      addLog('Creando inspecciones...');
+      for (const inspeccion of INSPECCIONES) {
+        await setDoc(doc(db, 'inspecciones', inspeccion.id), inspeccion);
+        addLog(`✓ Inspección ${inspeccion.id} — ${inspeccion.fecha}`);
+      }
+
+      // Seed facturas
+      addLog('Creando facturas...');
+      for (const factura of FACTURAS) {
+        await setDoc(doc(db, 'facturas', factura.id), factura);
+        addLog(`✓ Factura ${factura.id} — ${factura.cliente}`);
+      }
+
+      // Seed pagos
+      addLog('Creando pagos...');
+      for (const pago of PAGOS) {
+        await setDoc(doc(db, 'pagos', pago.id), pago);
+        addLog(`✓ Pago ${pago.id} — ${pago.cliente}`);
       }
 
       addLog('');
@@ -118,7 +164,11 @@ export default function Seed() {
           <div style={{ background: 'var(--gray-50)', borderRadius: '8px', padding: '14px 16px', marginBottom: '20px' }}>
             <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--gray-500)', textTransform: 'uppercase', letterSpacing: '0.6px', marginBottom: '10px' }}>Se crearán:</div>
             <div style={{ fontSize: '13px', color: 'var(--gray-700)', marginBottom: '4px' }}>• {TICKETS.length} tickets</div>
-            <div style={{ fontSize: '13px', color: 'var(--gray-700)' }}>• {CLIENTES.length} clientes</div>
+            <div style={{ fontSize: '13px', color: 'var(--gray-700)', marginBottom: '4px' }}>• {CLIENTES.length} clientes</div>
+            <div style={{ fontSize: '13px', color: 'var(--gray-700)', marginBottom: '4px' }}>• {SEMANAS.length} semanas</div>
+            <div style={{ fontSize: '13px', color: 'var(--gray-700)', marginBottom: '4px' }}>• {INSPECCIONES.length} inspecciones</div>
+            <div style={{ fontSize: '13px', color: 'var(--gray-700)', marginBottom: '4px' }}>• {FACTURAS.length} facturas</div>
+            <div style={{ fontSize: '13px', color: 'var(--gray-700)' }}>• {PAGOS.length} pagos</div>
           </div>
 
           {!done && (
@@ -148,7 +198,7 @@ export default function Seed() {
 
           {done && (
             <div style={{ marginTop: '16px', background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '8px', padding: '12px 16px', fontSize: '13px', color: '#065F46' }}>
-              ✅ Listo. Ahora puedes ir a <strong>/tickets</strong> y <strong>/clientes</strong> para ver los datos reales.
+              ✅ Listo. Ahora puedes ir a <strong>/tickets</strong>, <strong>/clientes</strong>, <strong>/semanas</strong>, <strong>/inspecciones</strong>, <strong>/facturas</strong> y <strong>/pagos</strong> para ver los datos reales.
             </div>
           )}
         </div>
