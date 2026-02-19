@@ -199,6 +199,37 @@ export default function Tickets() {
           </div>
         )}
       </div>
+
+      {/* Modal Registrar OC */}
+      {showModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }} onClick={() => setShowModal(false)}>
+          <div style={{ background: 'white', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', width: '90%', maxWidth: '400px' }} onClick={e => e.stopPropagation()}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--gray-200)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--gray-900)' }}>Registrar OC</div>
+              <button onClick={() => setShowModal(false)} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: 'var(--gray-400)' }}>✕</button>
+            </div>
+            <div style={{ padding: '20px' }}>
+              <div style={{ fontSize: '13px', color: 'var(--gray-700)', marginBottom: '16px' }}>
+                Ingresa el número de OC para desbloquear este proyecto.
+              </div>
+              <input type="text" placeholder="Ej: PO-31764" style={{ width: '100%', padding: '10px', border: '1px solid var(--gray-300)', borderRadius: '6px', fontSize: '13px', marginBottom: '16px' }} id="ocInput" />
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button onClick={() => setShowModal(false)} style={{ flex: 1, padding: '8px', background: 'var(--gray-100)', border: '1px solid var(--gray-200)', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', color: 'var(--gray-600)' }}>
+                  Cancelar
+                </button>
+                <button onClick={() => {
+                  const ocValue = (document.getElementById('ocInput') as HTMLInputElement).value;
+                  if (ocValue) {
+                    setShowModal(false);
+                  }
+                }} style={{ flex: 1, padding: '8px', background: '#F97316', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
+                  Registrar
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }
