@@ -1,92 +1,54 @@
 import Layout from '@/components/layout/Layout';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 const MONO = "ui-monospace, 'SF Mono', 'Cascadia Code', monospace";
 
-const SEMANAS = [
-  {
-    id: 'SEM-07-2026',
-    semana: 'Semana 07',
-    rango: '10 Feb — 14 Feb 2026',
-    proyecto: 'EM26-01',
-    cliente: 'Eurospec Mfg.',
-    planta: 'Fisher Dynamics',
-    supervisor: 'A. Serrano',
-    diasTrabajados: 5,
-    horasTotal: 40,
-    inspeccionadas: 9720,
-    ok: 9500,
-    nok: 220,
-    tasaNok: '2.26%',
-    estado: 'Lista para Facturar',
-    ec: '#059669',
-    eb: '#ECFDF5',
-    monto: '$1,600',
-    oc: '',
-    pod: true,
-    reporte: true,
-    firma: true,
-  },
-  {
-    id: 'SEM-07-2026-RD',
-    semana: 'Semana 07',
-    rango: '10 Feb — 14 Feb 2026',
-    proyecto: 'RD26-01',
-    cliente: 'Ranger Die Inc.',
-    planta: 'Adient Matamoros',
-    supervisor: 'O. Pech',
-    diasTrabajados: 5,
-    horasTotal: 40,
-    inspeccionadas: 6290,
-    ok: 6261,
-    nok: 29,
-    tasaNok: '0.46%',
-    estado: 'Bloqueada',
-    ec: '#DC2626',
-    eb: '#FEF2F2',
-    monto: '$1,600',
-    oc: 'PO-31764',
-    pod: false,
-    reporte: true,
-    firma: false,
-  },
-  {
-    id: 'SEM-06-2026',
-    semana: 'Semana 06',
-    rango: '03 Feb — 07 Feb 2026',
-    proyecto: 'EM26-01',
-    cliente: 'Eurospec Mfg.',
-    planta: 'Fisher Dynamics',
-    supervisor: 'A. Serrano',
-    diasTrabajados: 5,
-    horasTotal: 40,
-    inspeccionadas: 9400,
-    ok: 9350,
-    nok: 50,
-    tasaNok: '0.53%',
-    estado: 'Facturada',
-    ec: '#D97706',
-    eb: '#FFFBEB',
-    monto: '$1,600',
-    oc: '',
-    pod: true,
-    reporte: true,
-    firma: true,
-  },
-];
-
 const TABS = ['Todas', 'Lista para Facturar', 'Bloqueada', 'Facturada', 'Pagada'];
 
-type Semana = typeof SEMANAS[0];
+interface Semana {
+  id: string;
+  semana: string;
+  rango: string;
+  proyecto: string;
+  cliente: string;
+  planta: string;
+  supervisor: string;
+  diasTrabajados: number;
+  horasTotal: number;
+  inspeccionadas: number;
+  ok: number;
+  nok: number;
+  tasaNok: string;
+  estado: string;
+  ec: string;
+  eb: string;
+  monto: string;
+  oc: string;
+  pod: boolean;
+  reporte: boolean;
+  firma: boolean;
+}
 
 export default function Semanas() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('Todas');
-  const [selected, setSelected] = useState<Semana>(SEMANAS[0]);
+  const [semanas, setSemanas] = useState<Semana[]>([]);
+  const [selected, setSelected] = useState<Semana | null>(null);
 
-  const filtered = SEMANAS.filter(s =>
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'semanas'), (snap) => {
+      const data = snap.docs.map(d => ({ id: d.id, ...d.data() } as Semana));
+      setSemanas(data);
+      setSelected(prev => prev ? data.find(s => s.id === prev.id) || data[0] : data[0]);
+    });
+    return () => unsub();
+  }, []);
+
+  const filtered = semanas.filter(s =>
     activeTab === 'Todas' ? true : s.estado === activeTab
   );
 
@@ -96,7 +58,7 @@ export default function Semanas() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <div style={{ fontSize: '13px', color: 'var(--gray-500)' }}>
-          {SEMANAS.length} semanas registradas
+          {semanas.length} semanas registradas
         </div>
         <Link href='/semanas/nueva'><button style={{ padding: '7px 14px', background: 'var(--gray-900)', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
           + Nueva Semana</button></Link>
@@ -105,7 +67,7 @@ export default function Semanas() {
       {/* Tabs */}
       <div style={{ display: 'flex', borderBottom: '1px solid var(--gray-200)', marginBottom: '16px', overflowX: 'auto' }}>
         {TABS.map(tab => {
-          const count = tab === 'Todas' ? SEMANAS.length : SEMANAS.filter(s => s.estado === tab).length;
+          const count = tab === 'Todas' ? semanas.length : semanas.filter(s => s.estado === tab).length;
           const isActive = activeTab === tab;
           return (
             <div key={tab} onClick={() => setActiveTab(tab)} style={{
