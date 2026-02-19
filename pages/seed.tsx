@@ -78,7 +78,7 @@ const INSPECCIONES = [
 ];
 
 const FACTURAS = [
-  { id: 'FAC-001', proyecto: 'EM26-01', cliente: 'Eurospec Mfg.', semana: 'Sem 06', fechaEmision: '2026-02-10', fechaVencimiento: '2026-03-11', horas: 40, tarifa: '$40', total: 1600, estado: 'Enviada', oc: 'PO-31764' },
+  { id: 'FAC-001', proyecto: 'EM26-01', cliente: 'Eurospec Mfg.', semana: 'Sem 06', fechaEmision: '2026-02-10', fechaVencimiento: '2026-03-11', horas: 40, tarifa: '$40', total: '$1,600.00', estado: 'Enviada', oc: 'PO-31764' },
 ];
 
 const PAGOS = [

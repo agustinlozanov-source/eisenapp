@@ -51,13 +51,19 @@ export default function Facturas() {
     activeTab === 'Todas' ? true : f.estado === activeTab
   );
 
+  // Helper to safely convert total to number
+  const getTotalAsNumber = (total: string | number): number => {
+    if (typeof total === 'number') return total;
+    return parseFloat(String(total).replace(/[$,]/g, '')) || 0;
+  };
+
   const totalAR = facturas
     .filter(f => f.estado !== 'Pagada')
-    .reduce((acc, f) => acc + parseFloat(f.total.replace(/[$,]/g, '')), 0);
+    .reduce((acc, f) => acc + getTotalAsNumber(f.total), 0);
 
   const totalVencido = facturas
     .filter(f => f.estado === 'Vencida')
-    .reduce((acc, f) => acc + parseFloat(f.total.replace(/[$,]/g, '')), 0);
+    .reduce((acc, f) => acc + getTotalAsNumber(f.total), 0);
 
   return (
     <Layout title="Facturas">
@@ -227,7 +233,7 @@ export default function Facturas() {
 
               <div style={{ display: 'flex', gap: '8px' }}>
                 {selected.estado !== 'Pagada' && (
-                  <button onClick={() => { setPagoForm({ fecha: '2026-02-19', monto: selected.total.replace(/[$,]/g, ''), metodo: 'Wire Transfer', referencia: '' }); setPagoModal(true); }} style={{ flex: 1, padding: '8px', background: '#059669', color: 'white', border: 'none', borderRadius: '6px', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
+                  <button onClick={() => { const monto = String(getTotalAsNumber(selected.total)); setPagoForm({ fecha: '2026-02-19', monto, metodo: 'Wire Transfer', referencia: '' }); setPagoModal(true); }} style={{ flex: 1, padding: '8px', background: '#059669', color: 'white', border: 'none', borderRadius: '6px', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
                     Registrar Pago
                   </button>
                 )}
