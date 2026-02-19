@@ -1,4 +1,5 @@
 import Layout from '@/components/layout/Layout';
+import { useRouter } from 'next/router';
 import { useState } from 'react';
 
 const MONO = "ui-monospace, 'SF Mono', 'Cascadia Code', monospace";
@@ -49,8 +50,10 @@ const TABS = ['Todos', 'En Proceso', 'En Espera', 'Cerrados'];
 type Ticket = typeof TICKETS_DATA[0];
 
 export default function Tickets() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('Todos');
   const [selected, setSelected] = useState<Ticket>(TICKETS_DATA[1]);
+  const [showModal, setShowModal] = useState(false);
 
   const filtered = TICKETS_DATA.filter(t => {
     if (activeTab === 'Todos') return true;
@@ -185,7 +188,7 @@ export default function Tickets() {
               </div>
 
               <div style={{ display: 'flex', gap: '8px' }}>
-                <button style={{ flex: 1, padding: '8px', background: '#F97316', color: 'white', border: 'none', borderRadius: '6px', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
+                <button onClick={() => selected.estado === 'En Espera' ? setShowModal(true) : router.push('/inspecciones?proyecto=' + selected.id)} style={{ flex: 1, padding: '8px', background: '#F97316', color: 'white', border: 'none', borderRadius: '6px', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
                   {selected.estado === 'En Espera' ? 'Registrar OC' : 'Ver Inspecciones'}
                 </button>
                 <button style={{ padding: '8px 12px', background: 'white', border: '1px solid var(--gray-200)', borderRadius: '6px', fontSize: '12.5px', color: 'var(--gray-600)', cursor: 'pointer' }}>
