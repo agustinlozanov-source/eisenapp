@@ -1,94 +1,61 @@
 import Layout from '@/components/layout/Layout';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 
 const MONO = "ui-monospace, 'SF Mono', 'Cascadia Code', monospace";
 
-const FACTURAS = [
-  {
-    id: 'INV-2026-001',
-    cliente: 'Eurospec Mfg.',
-    planta: 'Fisher Dynamics',
-    proyecto: 'EM26-01',
-    semana: 'Sem 06',
-    fechaEmision: '2026-02-10',
-    fechaVencimiento: '2026-03-11',
-    diasVencimiento: 29,
-    horas: 40,
-    tarifa: '$40.00',
-    subtotal: '$1,600.00',
-    total: '$1,600.00',
-    estado: 'Enviada',
-    ec: '#D97706',
-    eb: '#FFFBEB',
-    oc: 'N/A',
-    notas: 'Semana 06 — Fisher Dynamics Newmarket',
-    pagos: [],
-  },
-  {
-    id: 'INV-2026-002',
-    cliente: 'Ranger Die Inc.',
-    planta: 'Adient Matamoros',
-    proyecto: 'RD26-01',
-    semana: 'Sem 06',
-    fechaEmision: '2026-02-10',
-    fechaVencimiento: '2026-02-10',
-    diasVencimiento: -9,
-    horas: 40,
-    tarifa: '$40.00',
-    subtotal: '$1,600.00',
-    total: '$1,600.00',
-    estado: 'Vencida',
-    ec: '#DC2626',
-    eb: '#FEF2F2',
-    oc: 'PO-31764',
-    notas: 'Semana 06 — Adient Matamoros',
-    pagos: [],
-  },
-  {
-    id: 'INV-2026-003',
-    cliente: 'Ranger Die Inc.',
-    planta: 'Adient Matamoros',
-    proyecto: 'RD26-01',
-    semana: 'Sem 05',
-    fechaEmision: '2026-02-03',
-    fechaVencimiento: '2026-02-03',
-    diasVencimiento: 0,
-    horas: 40,
-    tarifa: '$40.00',
-    subtotal: '$1,600.00',
-    total: '$1,600.00',
-    estado: 'Pagada',
-    ec: '#059669',
-    eb: '#ECFDF5',
-    oc: 'PO-31764',
-    notas: 'Semana 05 — Adient Matamoros',
-    pagos: [{ fecha: '2026-02-15', monto: '$1,600.00', metodo: 'Wire Transfer' }],
-  },
-];
+interface Factura {
+  id: string;
+  cliente: string;
+  planta: string;
+  proyecto: string;
+  semana: string;
+  fechaEmision: string;
+  fechaVencimiento: string;
+  diasVencimiento: number;
+  horas: number;
+  tarifa: string;
+  subtotal: string;
+  total: string;
+  estado: string;
+  ec: string;
+  eb: string;
+  oc: string;
+  notas: string;
+  pagos: { fecha: string; monto: string; metodo: string }[];
+};
 
 const TABS = ['Todas', 'Enviada', 'Vencida', 'Pagada'];
-
-type Factura = typeof FACTURAS[0];
 
 export default function Facturas() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('Todas');
-  const [selected, setSelected] = useState<Factura>(FACTURAS[1]);
+  const [facturas, setFacturas] = useState<Factura[]>([]);
+  const [selected, setSelected] = useState<Factura | null>(null);
   const [pagoModal, setPagoModal] = useState(false);
   const [pagoForm, setPagoForm] = useState({ fecha: '2026-02-19', monto: '', metodo: 'Wire Transfer', referencia: '' });
-  const [facturasState, setFacturasState] = useState(FACTURAS);
 
-  const filtered = FACTURAS.filter(f =>
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'facturas'), (snap) => {
+      const data = snap.docs.map(d => ({ id: d.id, ...d.data() } as Factura));
+      setFacturas(data);
+      setSelected(prev => prev ? data.find(f => f.id === prev.id) || data[0] : data[0]);
+    });
+    return () => unsub();
+  }, []);
+
+  const filtered = facturas.filter(f =>
     activeTab === 'Todas' ? true : f.estado === activeTab
   );
 
-  const totalAR = FACTURAS
+  const totalAR = facturas
     .filter(f => f.estado !== 'Pagada')
     .reduce((acc, f) => acc + parseFloat(f.total.replace(/[$,]/g, '')), 0);
 
-  const totalVencido = FACTURAS
+  const totalVencido = facturas
     .filter(f => f.estado === 'Vencida')
     .reduce((acc, f) => acc + parseFloat(f.total.replace(/[$,]/g, '')), 0);
 
@@ -103,8 +70,8 @@ export default function Facturas() {
         {[
           { label: 'AR Total',     value: `$${totalAR.toLocaleString()}`,     color: '#3B82F6' },
           { label: 'Vencido',      value: `$${totalVencido.toLocaleString()}`, color: '#EF4444' },
-          { label: 'Facturas',     value: FACTURAS.length.toString(),          color: '#6B7280' },
-          { label: 'Pagadas',      value: FACTURAS.filter(f => f.estado === 'Pagada').length.toString(), color: '#10B981' },
+          { label: 'Facturas',     value: facturas.length.toString(),          color: '#6B7280' },
+          { label: 'Pagadas',      value: facturas.filter(f => f.estado === 'Pagada').length.toString(), color: '#10B981' },
         ].map((k, i) => (
           <div key={i} style={{ background: 'white', border: '1px solid var(--gray-200)', borderRadius: '10px', padding: '16px 20px', position: 'relative', overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: k.color }} />
@@ -117,7 +84,7 @@ export default function Facturas() {
       {/* Tabs */}
       <div style={{ display: 'flex', borderBottom: '1px solid var(--gray-200)', marginBottom: '16px' }}>
         {TABS.map(tab => {
-          const count = tab === 'Todas' ? FACTURAS.length : FACTURAS.filter(f => f.estado === tab).length;
+          const count = tab === 'Todas' ? facturas.length : facturas.filter(f => f.estado === tab).length;
           const isActive = activeTab === tab;
           return (
             <div key={tab} onClick={() => setActiveTab(tab)} style={{
@@ -306,11 +273,15 @@ export default function Facturas() {
                   <button onClick={() => setPagoModal(false)} style={{ flex: 1, padding: '8px', background: 'var(--gray-100)', border: '1px solid var(--gray-200)', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', color: 'var(--gray-600)' }}>
                     Cancelar
                   </button>
-                  <button onClick={() => {
-                    const newFacturas = facturasState.map(f => f.id === selected.id ? { ...f, estado: 'Pagada', ec: '#059669', eb: '#ECFDF5', pagos: [...f.pagos, { fecha: pagoForm.fecha, monto: '$' + pagoForm.monto, metodo: pagoForm.metodo }] } : f);
-                    setFacturasState(newFacturas);
-                    setSelected({ ...selected, estado: 'Pagada', ec: '#059669', eb: '#ECFDF5', pagos: [...selected.pagos, { fecha: pagoForm.fecha, monto: '$' + pagoForm.monto, metodo: pagoForm.metodo }] });
-                    setPagoModal(false);
+                  <button onClick={async () => {
+                    if (selected) {
+                      await updateDoc(doc(db, 'facturas', selected.id), {
+                        estado: 'Pagada',
+                        pagos: [...selected.pagos, { fecha: pagoForm.fecha, monto: pagoForm.monto, metodo: pagoForm.metodo }],
+                      });
+                      setPagoModal(false);
+                      setPagoForm({ fecha: '2026-02-19', monto: '', metodo: 'Wire Transfer', referencia: '' });
+                    }
                   }} style={{ flex: 1, padding: '8px', background: '#059669', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
                     Confirmar
                   </button>
