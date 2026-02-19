@@ -1,89 +1,62 @@
 import Layout from '@/components/layout/Layout';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 
 const MONO = "ui-monospace, 'SF Mono', 'Cascadia Code', monospace";
 
-const PAGOS = [
-  {
-    id: 'PAY-001',
-    factura: 'INV-2026-003',
-    cliente: 'Ranger Die Inc.',
-    planta: 'Adient Matamoros',
-    proyecto: 'RD26-01',
-    fecha: '2026-02-15',
-    monto: '$1,600.00',
-    metodo: 'Wire Transfer',
-    referencia: 'WT-20260215-RD',
-    estado: 'Confirmado',
-    ec: '#059669',
-    eb: '#ECFDF5',
-    banco: 'BMO Harris Bank',
-    notas: 'Pago recibido en cuenta USD. Confirmado por contabilidad.',
-    diasDesdeFecha: 4,
-  },
-  {
-    id: 'PAY-002',
-    factura: 'INV-2026-001',
-    cliente: 'Eurospec Mfg.',
-    planta: 'Fisher Dynamics',
-    proyecto: 'EM26-01',
-    fecha: '2026-03-11',
-    monto: '$1,600.00',
-    metodo: 'Wire Transfer',
-    referencia: '',
-    estado: 'Pendiente',
-    ec: '#D97706',
-    eb: '#FFFBEB',
-    banco: '',
-    notas: 'Factura enviada. Vence 11 Mar 2026.',
-    diasDesdeFecha: -20,
-  },
-  {
-    id: 'PAY-003',
-    factura: 'INV-2026-002',
-    cliente: 'Ranger Die Inc.',
-    planta: 'Adient Matamoros',
-    proyecto: 'RD26-01',
-    fecha: '2026-02-10',
-    monto: '$1,600.00',
-    metodo: '',
-    referencia: '',
-    estado: 'Vencido',
-    ec: '#DC2626',
-    eb: '#FEF2F2',
-    banco: '',
-    notas: 'Factura vencida. Sin respuesta del cliente.',
-    diasDesdeFecha: -9,
-  },
-];
+interface Pago {
+  id: string;
+  factura: string;
+  cliente: string;
+  planta: string;
+  proyecto: string;
+  fecha: string;
+  monto: string;
+  metodo: string;
+  referencia: string;
+  estado: string;
+  ec: string;
+  eb: string;
+  banco: string;
+  notas: string;
+  diasDesdeFecha: number;
+};
 
 const TABS = ['Todos', 'Confirmado', 'Pendiente', 'Vencido'];
 
-type Pago = typeof PAGOS[0];
-
 export default function Pagos() {
   const [activeTab, setActiveTab] = useState('Todos');
-  const [selected, setSelected] = useState<Pago>(PAGOS[0]);
-  const [pagosState, setPagosState] = useState(PAGOS);
+  const [pagos, setPagos] = useState<Pago[]>([]);
+  const [selected, setSelected] = useState<Pago | null>(null);
   const [confirmarModal, setConfirmarModal] = useState(false);
   const [confirmarForm, setConfirmarForm] = useState({ referencia: '', banco: '', fechaConfirmacion: '2026-02-19' });
   const [recordatorioModal, setRecordatorioModal] = useState(false);
   const [recordatorioMsg, setRecordatorioMsg] = useState('');
   const [comprobantModal, setComprobantModal] = useState(false);
 
-  const filtered = PAGOS.filter(p =>
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'pagos'), (snap) => {
+      const data = snap.docs.map(d => ({ id: d.id, ...d.data() } as Pago));
+      setPagos(data);
+      setSelected(prev => prev ? data.find(p => p.id === prev.id) || data[0] : data[0]);
+    });
+    return () => unsub();
+  }, []);
+
+  const filtered = pagos.filter(p =>
     activeTab === 'Todos' ? true : p.estado === activeTab
   );
 
-  const totalCobrado = PAGOS
+  const totalCobrado = pagos
     .filter(p => p.estado === 'Confirmado')
     .reduce((acc, p) => acc + parseFloat(p.monto.replace(/[$,]/g, '')), 0);
 
-  const totalPendiente = PAGOS
+  const totalPendiente = pagos
     .filter(p => p.estado === 'Pendiente')
     .reduce((acc, p) => acc + parseFloat(p.monto.replace(/[$,]/g, '')), 0);
 
-  const totalVencido = PAGOS
+  const totalVencido = pagos
     .filter(p => p.estado === 'Vencido')
     .reduce((acc, p) => acc + parseFloat(p.monto.replace(/[$,]/g, '')), 0);
 
@@ -108,7 +81,7 @@ export default function Pagos() {
       {/* Tabs */}
       <div style={{ display: 'flex', borderBottom: '1px solid var(--gray-200)', marginBottom: '16px' }}>
         {TABS.map(tab => {
-          const count = tab === 'Todos' ? PAGOS.length : PAGOS.filter(p => p.estado === tab).length;
+          const count = tab === 'Todos' ? pagos.length : pagos.filter(p => p.estado === tab).length;
           const isActive = activeTab === tab;
           return (
             <div key={tab} onClick={() => setActiveTab(tab)} style={{
@@ -279,11 +252,13 @@ export default function Pagos() {
                   <button onClick={() => setConfirmarModal(false)} style={{ flex: 1, padding: '8px', background: 'var(--gray-100)', border: '1px solid var(--gray-200)', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', color: 'var(--gray-600)' }}>
                     Cancelar
                   </button>
-                  <button onClick={() => {
-                    const newPagos = pagosState.map(p => p.id === selected.id ? { ...p, estado: 'Confirmado', ec: '#059669', eb: '#ECFDF5', referencia: confirmarForm.referencia, banco: confirmarForm.banco } : p);
-                    setPagosState(newPagos);
-                    setSelected({ ...selected, estado: 'Confirmado', ec: '#059669', eb: '#ECFDF5', referencia: confirmarForm.referencia, banco: confirmarForm.banco });
-                    setConfirmarModal(false);
+                  <button onClick={async () => {
+                    if (selected) {
+                      const { referencia, banco, fechaConfirmacion } = confirmarForm;
+                      await updateDoc(doc(db, 'pagos', selected.id), { estado: 'Confirmado', referencia, banco, fechaConfirmacion });
+                      setConfirmarModal(false);
+                      setConfirmarForm({ referencia: '', banco: '', fechaConfirmacion: '2026-02-19' });
+                    }
                   }} style={{ flex: 1, padding: '8px', background: '#059669', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
                     Confirmar
                   </button>
