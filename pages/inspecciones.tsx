@@ -51,7 +51,7 @@ export default function Inspecciones() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <div style={{ fontSize: '13px', color: 'var(--gray-500)' }}>
-          {INSPECCIONES.length} inspecciones esta semana
+          {inspecciones.length} inspecciones esta semana
         </div>
         <button style={{ padding: '7px 14px', background: '#F97316', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
           + Nueva Inspección
