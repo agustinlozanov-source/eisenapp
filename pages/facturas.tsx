@@ -206,10 +206,10 @@ export default function Facturas() {
               ))}
 
               {/* Pagos */}
-              {selected.pagos.length > 0 && (
+              {(selected.pagos || []).length > 0 && (
                 <div style={{ marginTop: '8px', marginBottom: '14px' }}>
                   <div style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--gray-400)', marginBottom: '8px' }}>Pagos Recibidos</div>
-                  {selected.pagos.map((p, i) => (
+                  {(selected.pagos || []).map((p, i) => (
                     <div key={i} style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '8px', padding: '10px 12px' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <div>
