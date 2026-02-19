@@ -1,4 +1,5 @@
 import Sidebar from './Sidebar';
+import Link from 'next/link';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -35,14 +36,16 @@ export default function Layout({ children, title = 'EISEN' }: LayoutProps) {
               }}
             />
           </div>
-          <button style={{
-            display: 'flex', alignItems: 'center', gap: '6px',
-            padding: '7px 14px', background: 'var(--gray-900)',
-            color: 'white', border: 'none', borderRadius: '6px',
-            fontSize: '13px', fontWeight: 500,
-          }}>
-            + Nuevo Ticket
-          </button>
+          <Link href="/tickets/nuevo">
+            <button style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
+              padding: '7px 14px', background: 'var(--gray-900)',
+              color: 'white', border: 'none', borderRadius: '6px',
+              fontSize: '13px', fontWeight: 500, cursor: 'pointer',
+            }}>
+              + Nuevo Ticket
+            </button>
+          </Link>
         </div>
 
         {/* Page content */}
