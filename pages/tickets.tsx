@@ -1,64 +1,64 @@
 import Layout from '@/components/layout/Layout';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot, doc, updateDoc } from 'firebase/firestore';
 
 const MONO = "ui-monospace, 'SF Mono', 'Cascadia Code', monospace";
 
-const TICKETS_DATA = [
-  {
-    id: 'EM26-01',
-    cliente: 'Eurospec Mfg.',
-    contacto: 'James Whitfield',
-    planta: 'Fisher Dynamics',
-    ciudad: 'Newmarket, ON',
-    issue: 'Missing Tabs — Mal Troquelado',
-    descripcion: 'Piezas con tabs faltantes detectadas en línea de producción. Cliente requiere inspección 100% del lote en planta.',
-    parte: '195364',
-    lote: '02226',
-    qty: '9,720',
-    oc: '',
-    estado: 'En Proceso',
-    ec: '#10B981',
-    eb: '#ECFDF5',
-    asignado: 'A. Serrano',
-    fecha: '2026-02-10',
-    semana: 'Sem 07',
-  },
-  {
-    id: 'RD26-01',
-    cliente: 'Ranger Die Inc.',
-    contacto: 'Bob Ranger',
-    planta: 'Adient',
-    ciudad: 'Matamoros, MX',
-    issue: 'Metal Split — Bkt Reinforcement',
-    descripcion: 'Metal split encontrado en bracket de refuerzo. Lote completo en warehouse pendiente de disposición. OC requerida para continuar.',
-    parte: '3232903',
-    lote: '32825',
-    qty: '6,290',
-    oc: 'PO-31764',
-    estado: 'En Espera',
-    ec: '#EF4444',
-    eb: '#FEF2F2',
-    asignado: 'O. Pech',
-    fecha: '2026-02-12',
-    semana: 'Sem 07',
-  },
-];
-
 const TABS = ['Todos', 'En Proceso', 'En Espera', 'Cerrados'];
 
-type Ticket = typeof TICKETS_DATA[0];
+interface Ticket {
+  id: string;
+  cliente: string;
+  contacto: string;
+  planta: string;
+  ciudad: string;
+  issue: string;
+  descripcion: string;
+  parte: string;
+  lote: string;
+  qty: string;
+  oc: string;
+  estado: string;
+  ec: string;
+  eb: string;
+  asignado: string;
+  fecha: string;
+  semana: string;
+}
 
 export default function Tickets() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('Todos');
-  const [selected, setSelected] = useState<Ticket>(TICKETS_DATA[1]);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [selected, setSelected] = useState<Ticket | null>(null);
   const [showModal, setShowModal] = useState(false);
 
-  const filtered = TICKETS_DATA.filter(t => {
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'tickets'), (snap) => {
+      const data = snap.docs.map(d => ({ id: d.id, ...d.data() } as Ticket));
+      setTickets(data);
+      setSelected(prev => prev ? data.find(t => t.id === prev.id) || data[0] : data[0]);
+    });
+    return () => unsub();
+  }, []);
+
+  const filtered = tickets.filter(t => {
     if (activeTab === 'Todos') return true;
     return t.estado === activeTab;
   });
+
+  const handleRegistrarOC = async (ocValue: string) => {
+    if (selected && ocValue.trim()) {
+      try {
+        await updateDoc(doc(db, 'tickets', selected.id), { oc: ocValue.trim(), estado: 'En Proceso' });
+        setShowModal(false);
+      } catch (err) {
+        console.error('Error registrando OC:', err);
+      }
+    }
+  };
 
   return (
     <Layout title="Tickets de Servicio">
@@ -66,7 +66,7 @@ export default function Tickets() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
         <div style={{ fontSize: '13px', color: 'var(--gray-500)' }}>
-          {TICKETS_DATA.length} tickets activos
+          {tickets.length} tickets activos
         </div>
         <button style={{ padding: '7px 14px', background: 'var(--gray-900)', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
           + Nuevo Ticket
@@ -76,7 +76,7 @@ export default function Tickets() {
       {/* Tabs */}
       <div style={{ display: 'flex', borderBottom: '1px solid var(--gray-200)', marginBottom: '16px' }}>
         {TABS.map(tab => {
-          const count = tab === 'Todos' ? TICKETS_DATA.length : TICKETS_DATA.filter(t => t.estado === tab).length;
+          const count = tab === 'Todos' ? tickets.length : tickets.filter(t => t.estado === tab).length;
           const isActive = activeTab === tab;
           return (
             <div key={tab} onClick={() => setActiveTab(tab)} style={{
@@ -219,9 +219,7 @@ export default function Tickets() {
                 </button>
                 <button onClick={() => {
                   const ocValue = (document.getElementById('ocInput') as HTMLInputElement).value;
-                  if (ocValue) {
-                    setShowModal(false);
-                  }
+                  handleRegistrarOC(ocValue);
                 }} style={{ flex: 1, padding: '8px', background: '#F97316', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
                   Registrar
                 </button>
