@@ -22,7 +22,7 @@ const estadoColor = (estado: string) => {
 };
 
 export default function Tickets() {
-  cons  cons  cons  cons  cons  cons  cons  cons  setActiveTab] = useState('Todos');
+  const [activeTab, setActiveTab] = useState('Todos');
   const [tickets, setTickets]     = useState<Ticket[]>([]);
   const [selected, setSelected]   = useState<Ticket | null>(null);
   const [loading, setLoading]     = useState(true);
