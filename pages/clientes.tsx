@@ -1,37 +1,10 @@
 import Layout from '@/components/layout/Layout';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 const MONO = "ui-monospace, 'SF Mono', 'Cascadia Code', monospace";
-
-const CLIENTES = [
-  {
-    id: 'CLI-001',
-    nombre: 'Eurospec Mfg.',
-    contacto: 'James Whitfield',
-    email: 'j.whitfield@eurospec.com',
-    telefono: '+1 519 555 0142',
-    planta: 'Fisher Dynamics — Newmarket, ON',
-    pais: 'Canada',
-    estado: 'Activo',
-    tickets: 1,
-    facturaPendiente: '$0',
-    ultimoTicket: '2026-02-10',
-  },
-  {
-    id: 'CLI-002',
-    nombre: 'Ranger Die Inc.',
-    contacto: 'Bob Ranger',
-    email: 'b.ranger@rangerdie.com',
-    telefono: '+1 519 555 0198',
-    planta: 'Adient — Matamoros, MX',
-    pais: 'Canada',
-    estado: 'Activo',
-    tickets: 1,
-    facturaPendiente: '$8,400',
-    ultimoTicket: '2026-02-12',
-  },
-];
 
 const BADGE: Record<string, { bg: string; color: string }> = {
   Activo:   { bg: '#ECFDF5', color: '#059669' },
@@ -40,8 +13,17 @@ const BADGE: Record<string, { bg: string; color: string }> = {
 
 export default function Clientes() {
   const [search, setSearch] = useState('');
+  const [clientes, setClientes] = useState([]);
 
-  const filtered = CLIENTES.filter(c =>
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'clientes'), (snap) => {
+      const data = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      setClientes(data);
+    });
+    return () => unsub();
+  }, []);
+
+  const filtered = clientes.filter(c =>
     c.nombre.toLowerCase().includes(search.toLowerCase()) ||
     c.contacto.toLowerCase().includes(search.toLowerCase()) ||
     c.planta.toLowerCase().includes(search.toLowerCase())
@@ -53,7 +35,7 @@ export default function Clientes() {
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <div style={{ fontSize: '13px', color: 'var(--gray-500)' }}>
-          {CLIENTES.length} clientes registrados
+          {clientes.length} clientes registrados
         </div>
         <Link href='/clientes/nuevo'><button style={{ padding: '7px 14px', background: 'var(--gray-900)', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>+ Nuevo Cliente</button></Link>
       </div>
