@@ -1,4 +1,5 @@
 import Layout from '@/components/layout/Layout';
+import Link from 'next/link';
 import { useState } from 'react';
 
 const MONO = "ui-monospace, 'SF Mono', 'Cascadia Code', monospace";
@@ -95,9 +96,8 @@ export default function Semanas() {
         <div style={{ fontSize: '13px', color: 'var(--gray-500)' }}>
           {SEMANAS.length} semanas registradas
         </div>
-        <button style={{ padding: '7px 14px', background: 'var(--gray-900)', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
-          + Nueva Semana
-        </button>
+        <Link href='/semanas/nueva'><button style={{ padding: '7px 14px', background: 'var(--gray-900)', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
+          + Nueva Semana</button></Link>
       </div>
 
       {/* Tabs */}
