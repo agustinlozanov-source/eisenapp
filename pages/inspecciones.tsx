@@ -1,105 +1,47 @@
 import Layout from '@/components/layout/Layout';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 const MONO = "ui-monospace, 'SF Mono', 'Cascadia Code', monospace";
 
-const INSPECCIONES = [
-  {
-    id: 'INS-001',
-    fecha: '2026-02-14',
-    diaSemana: 'Viernes',
-    proyecto: 'EM26-01',
-    cliente: 'Eurospec Mfg.',
-    planta: 'Fisher Dynamics',
-    semana: 'Sem 07',
-    supervisor: 'A. Serrano',
-    turno: 'Matutino',
-    total: 1944,
-    ok: 1900,
-    nok: 44,
-    tasaNok: '2.26%',
-    defectos: [
-      { codigo: 'MT-001', descripcion: 'Missing Tab', cantidad: 28 },
-      { codigo: 'BN-003', descripcion: 'Burr No Conformance', cantidad: 16 },
-    ],
-    firmado: true,
-    horaFirma: '16:45',
-    notas: 'Incremento de defectos en turno tarde. Se notificó a calidad.',
-  },
-  {
-    id: 'INS-002',
-    fecha: '2026-02-13',
-    diaSemana: 'Jueves',
-    proyecto: 'EM26-01',
-    cliente: 'Eurospec Mfg.',
-    planta: 'Fisher Dynamics',
-    semana: 'Sem 07',
-    supervisor: 'A. Serrano',
-    turno: 'Matutino',
-    total: 1944,
-    ok: 1930,
-    nok: 14,
-    tasaNok: '0.72%',
-    defectos: [
-      { codigo: 'MT-001', descripcion: 'Missing Tab', cantidad: 14 },
-    ],
-    firmado: true,
-    horaFirma: '16:30',
-    notas: '',
-  },
-  {
-    id: 'INS-003',
-    fecha: '2026-02-14',
-    diaSemana: 'Viernes',
-    proyecto: 'RD26-01',
-    cliente: 'Ranger Die Inc.',
-    planta: 'Adient Matamoros',
-    semana: 'Sem 07',
-    supervisor: 'O. Pech',
-    turno: 'Matutino',
-    total: 480,
-    ok: 451,
-    nok: 29,
-    tasaNok: '6.04%',
-    defectos: [
-      { codigo: 'MS-001', descripcion: 'Metal Split', cantidad: 29 },
-    ],
-    firmado: true,
-    horaFirma: '14:32',
-    notas: 'Metal split crítico. Se separó lote completo para disposición.',
-  },
-  {
-    id: 'INS-004',
-    fecha: '2026-02-13',
-    diaSemana: 'Jueves',
-    proyecto: 'RD26-01',
-    cliente: 'Ranger Die Inc.',
-    planta: 'Adient Matamoros',
-    semana: 'Sem 07',
-    supervisor: 'O. Pech',
-    turno: 'Matutino',
-    total: 480,
-    ok: 478,
-    nok: 2,
-    tasaNok: '0.42%',
-    defectos: [
-      { codigo: 'MS-001', descripcion: 'Metal Split', cantidad: 2 },
-    ],
-    firmado: true,
-    horaFirma: '14:15',
-    notas: '',
-  },
-];
-
-type Inspeccion = typeof INSPECCIONES[0];
+type Inspeccion = {
+  id: string;
+  fecha: string;
+  diaSemana: string;
+  proyecto: string;
+  cliente: string;
+  planta: string;
+  semana: string;
+  supervisor: string;
+  turno: string;
+  total: number;
+  ok: number;
+  nok: number;
+  tasaNok: string;
+  defectos: { codigo: string; descripcion: string; cantidad: number }[];
+  firmado: boolean;
+  horaFirma: string;
+  notas: string;
+};
 
 export default function Inspecciones() {
-  const [selected, setSelected] = useState<Inspeccion>(INSPECCIONES[0]);
+  const [inspecciones, setInspecciones] = useState<Inspeccion[]>([]);
+  const [selected, setSelected] = useState<Inspeccion | null>(null);
   const [filtroProyecto, setFiltroProyecto] = useState('Todos');
 
-  const proyectos = ['Todos', ...Array.from(new Set(INSPECCIONES.map(i => i.proyecto)))];
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'inspecciones'), (snap) => {
+      const data = snap.docs.map(d => ({ id: d.id, ...d.data() } as Inspeccion));
+      setInspecciones(data);
+      setSelected(prev => prev ? data.find(i => i.id === prev.id) || data[0] : data[0]);
+    });
+    return () => unsub();
+  }, []);
 
-  const filtered = INSPECCIONES.filter(i =>
+  const proyectos = ['Todos', ...Array.from(new Set(inspecciones.map(i => i.proyecto)))];
+
+  const filtered = inspecciones.filter(i =>
     filtroProyecto === 'Todos' ? true : i.proyecto === filtroProyecto
   );
 
