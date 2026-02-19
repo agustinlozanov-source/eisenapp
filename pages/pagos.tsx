@@ -64,6 +64,12 @@ type Pago = typeof PAGOS[0];
 export default function Pagos() {
   const [activeTab, setActiveTab] = useState('Todos');
   const [selected, setSelected] = useState<Pago>(PAGOS[0]);
+  const [pagosState, setPagosState] = useState(PAGOS);
+  const [confirmarModal, setConfirmarModal] = useState(false);
+  const [confirmarForm, setConfirmarForm] = useState({ referencia: '', banco: '', fechaConfirmacion: '2026-02-19' });
+  const [recordatorioModal, setRecordatorioModal] = useState(false);
+  const [recordatorioMsg, setRecordatorioMsg] = useState('');
+  const [comprobantModal, setComprobantModal] = useState(false);
 
   const filtered = PAGOS.filter(p =>
     activeTab === 'Todos' ? true : p.estado === activeTab
@@ -230,19 +236,129 @@ export default function Pagos() {
 
               <div style={{ display: 'flex', gap: '8px' }}>
                 {selected.estado === 'Confirmado' ? (
-                  <button style={{ flex: 1, padding: '8px', background: 'var(--gray-100)', color: 'var(--gray-600)', border: '1px solid var(--gray-200)', borderRadius: '6px', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
+                  <button onClick={() => setComprobantModal(true)} style={{ flex: 1, padding: '8px', background: 'var(--gray-100)', color: 'var(--gray-600)', border: '1px solid var(--gray-200)', borderRadius: '6px', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
                     Ver Comprobante
                   </button>
                 ) : (
-                  <button style={{ flex: 1, padding: '8px', background: '#059669', color: 'white', border: 'none', borderRadius: '6px', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
+                  <button onClick={() => { setConfirmarForm({ referencia: '', banco: '', fechaConfirmacion: '2026-02-19' }); setConfirmarModal(true); }} style={{ flex: 1, padding: '8px', background: '#059669', color: 'white', border: 'none', borderRadius: '6px', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
                     Confirmar Pago
                   </button>
                 )}
                 {selected.estado === 'Vencido' && (
-                  <button style={{ flex: 1, padding: '8px', background: '#F97316', color: 'white', border: 'none', borderRadius: '6px', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
+                  <button onClick={() => setRecordatorioModal(true)} style={{ flex: 1, padding: '8px', background: '#F97316', color: 'white', border: 'none', borderRadius: '6px', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
                     Enviar Recordatorio
                   </button>
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Confirmar Pago */}
+        {confirmarModal && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }} onClick={() => setConfirmarModal(false)}>
+            <div style={{ background: 'white', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', width: '90%', maxWidth: '500px' }} onClick={e => e.stopPropagation()}>
+              <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--gray-200)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--gray-900)' }}>Confirmar Pago</div>
+                <button onClick={() => setConfirmarModal(false)} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: 'var(--gray-400)' }}>✕</button>
+              </div>
+              <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--gray-500)', marginBottom: '6px' }}>Referencia Bancaria</label>
+                  <input type="text" value={confirmarForm.referencia} onChange={e => setConfirmarForm({ ...confirmarForm, referencia: e.target.value })} placeholder="Ej: WT-20260219-001" style={{ width: '100%', padding: '8px 10px', border: '1px solid var(--gray-300)', borderRadius: '6px', fontSize: '13px' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--gray-500)', marginBottom: '6px' }}>Banco</label>
+                  <input type="text" value={confirmarForm.banco} onChange={e => setConfirmarForm({ ...confirmarForm, banco: e.target.value })} placeholder="Ej: BMO Harris Bank" style={{ width: '100%', padding: '8px 10px', border: '1px solid var(--gray-300)', borderRadius: '6px', fontSize: '13px' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--gray-500)', marginBottom: '6px' }}>Fecha Confirmación</label>
+                  <input type="date" value={confirmarForm.fechaConfirmacion} onChange={e => setConfirmarForm({ ...confirmarForm, fechaConfirmacion: e.target.value })} style={{ width: '100%', padding: '8px 10px', border: '1px solid var(--gray-300)', borderRadius: '6px', fontSize: '13px' }} />
+                </div>
+                <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                  <button onClick={() => setConfirmarModal(false)} style={{ flex: 1, padding: '8px', background: 'var(--gray-100)', border: '1px solid var(--gray-200)', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', color: 'var(--gray-600)' }}>
+                    Cancelar
+                  </button>
+                  <button onClick={() => {
+                    const newPagos = pagosState.map(p => p.id === selected.id ? { ...p, estado: 'Confirmado', ec: '#059669', eb: '#ECFDF5', referencia: confirmarForm.referencia, banco: confirmarForm.banco } : p);
+                    setPagosState(newPagos);
+                    setSelected({ ...selected, estado: 'Confirmado', ec: '#059669', eb: '#ECFDF5', referencia: confirmarForm.referencia, banco: confirmarForm.banco });
+                    setConfirmarModal(false);
+                  }} style={{ flex: 1, padding: '8px', background: '#059669', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
+                    Confirmar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Enviar Recordatorio */}
+        {recordatorioModal && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }} onClick={() => setRecordatorioModal(false)}>
+            <div style={{ background: 'white', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', width: '90%', maxWidth: '400px' }} onClick={e => e.stopPropagation()}>
+              <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--gray-200)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--gray-900)' }}>Enviar Recordatorio</div>
+                <button onClick={() => setRecordatorioModal(false)} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: 'var(--gray-400)' }}>✕</button>
+              </div>
+              <div style={{ padding: '20px' }}>
+                <div style={{ fontSize: '13px', color: 'var(--gray-700)', marginBottom: '20px', textAlign: 'center' }}>
+                  ¿Enviar recordatorio de pago a <span style={{ fontWeight: 600 }}>{selected.cliente}</span>?
+                </div>
+                {recordatorioMsg && (
+                  <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '8px', padding: '10px 12px', marginBottom: '16px', color: '#065F46', fontSize: '12.5px', textAlign: 'center' }}>
+                    {recordatorioMsg}
+                  </div>
+                )}
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button onClick={() => setRecordatorioModal(false)} style={{ flex: 1, padding: '8px', background: 'var(--gray-100)', border: '1px solid var(--gray-200)', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', color: 'var(--gray-600)' }}>
+                    Cancelar
+                  </button>
+                  <button onClick={() => {
+                    setRecordatorioMsg('Recordatorio enviado');
+                    setTimeout(() => {
+                      setRecordatorioModal(false);
+                      setRecordatorioMsg('');
+                    }, 3000);
+                  }} style={{ flex: 1, padding: '8px', background: '#F97316', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
+                    Confirmar
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Ver Comprobante */}
+        {comprobantModal && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }} onClick={() => setComprobantModal(false)}>
+            <div style={{ background: 'white', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', width: '90%', maxWidth: '500px' }} onClick={e => e.stopPropagation()}>
+              <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--gray-200)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--gray-900)' }}>Comprobante de Pago</div>
+                <button onClick={() => setComprobantModal(false)} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: 'var(--gray-400)' }}>✕</button>
+              </div>
+              <div style={{ padding: '20px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div>
+                    <div style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--gray-400)', marginBottom: '4px' }}>Referencia</div>
+                    <div style={{ fontSize: '13px', fontFamily: MONO, color: 'var(--gray-800)', fontWeight: 500 }}>{selected.referencia || '—'}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--gray-400)', marginBottom: '4px' }}>Banco</div>
+                    <div style={{ fontSize: '13px', color: 'var(--gray-800)', fontWeight: 500 }}>{selected.banco || '—'}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--gray-400)', marginBottom: '4px' }}>Fecha</div>
+                    <div style={{ fontSize: '13px', fontFamily: MONO, color: 'var(--gray-800)' }}>{selected.fecha}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--gray-400)', marginBottom: '4px' }}>Monto</div>
+                    <div style={{ fontSize: '16px', fontFamily: MONO, fontWeight: 700, color: '#059669' }}>{selected.monto}</div>
+                  </div>
+                </div>
+                <button onClick={() => setComprobantModal(false)} style={{ width: '100%', marginTop: '16px', padding: '8px', background: 'var(--gray-900)', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
+                  Cerrar
+                </button>
               </div>
             </div>
           </div>

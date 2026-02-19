@@ -1,5 +1,6 @@
 import Layout from '@/components/layout/Layout';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useState } from 'react';
 
 const MONO = "ui-monospace, 'SF Mono', 'Cascadia Code', monospace";
@@ -81,6 +82,7 @@ const TABS = ['Todas', 'Lista para Facturar', 'Bloqueada', 'Facturada', 'Pagada'
 type Semana = typeof SEMANAS[0];
 
 export default function Semanas() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('Todas');
   const [selected, setSelected] = useState<Semana>(SEMANAS[0]);
 
@@ -256,7 +258,7 @@ export default function Semanas() {
               {/* Actions */}
               <div style={{ display: 'flex', gap: '8px' }}>
                 {selected.estado === 'Lista para Facturar' && (
-                  <button style={{ flex: 1, padding: '8px', background: '#059669', color: 'white', border: 'none', borderRadius: '6px', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
+                  <button onClick={() => router.push('/facturas/nueva?semana=' + selected.id)} style={{ flex: 1, padding: '8px', background: '#059669', color: 'white', border: 'none', borderRadius: '6px', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
                     Crear Factura
                   </button>
                 )}
@@ -266,11 +268,11 @@ export default function Semanas() {
                   </button>
                 )}
                 {selected.estado === 'Facturada' && (
-                  <button style={{ flex: 1, padding: '8px', background: 'var(--gray-100)', color: 'var(--gray-600)', border: '1px solid var(--gray-200)', borderRadius: '6px', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
+                  <button onClick={() => router.push('/facturas?proyecto=' + selected.proyecto)} style={{ flex: 1, padding: '8px', background: 'var(--gray-100)', color: 'var(--gray-600)', border: '1px solid var(--gray-200)', borderRadius: '6px', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
                     Ver Factura
                   </button>
                 )}
-                <button style={{ padding: '8px 12px', background: 'white', border: '1px solid var(--gray-200)', borderRadius: '6px', fontSize: '12.5px', color: 'var(--gray-600)', cursor: 'pointer' }}>
+                <button onClick={() => router.push('/inspecciones?proyecto=' + selected.proyecto)} style={{ padding: '8px 12px', background: 'white', border: '1px solid var(--gray-200)', borderRadius: '6px', fontSize: '12.5px', color: 'var(--gray-600)', cursor: 'pointer' }}>
                   Ver Inspecciones
                 </button>
               </div>

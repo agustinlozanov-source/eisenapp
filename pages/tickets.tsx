@@ -22,6 +22,7 @@ const TICKETS_DATA = [
     asignado: 'A. Serrano',
     fecha: '2026-02-10',
     semana: 'Sem 07',
+    notas: '',
   },
   {
     id: 'RD26-01',
@@ -41,6 +42,7 @@ const TICKETS_DATA = [
     asignado: 'O. Pech',
     fecha: '2026-02-12',
     semana: 'Sem 07',
+    notas: '',
   },
 ];
 
@@ -51,6 +53,9 @@ type Ticket = typeof TICKETS_DATA[0];
 export default function Tickets() {
   const [activeTab, setActiveTab] = useState('Todos');
   const [selected, setSelected] = useState<Ticket>(TICKETS_DATA[1]);
+  const [notasModal, setNotasModal] = useState(false);
+  const [notasText, setNotasText] = useState('');
+  const [ticketsState, setTicketsState] = useState(TICKETS_DATA);
 
   const filtered = TICKETS_DATA.filter(t => {
     if (activeTab === 'Todos') return true;
@@ -184,13 +189,53 @@ export default function Tickets() {
                 <div style={{ fontSize: '12.5px', color: 'var(--gray-700)', lineHeight: 1.55 }}>{selected.descripcion}</div>
               </div>
 
+              {selected.notas && (
+                <div style={{ background: 'var(--gray-50)', borderRadius: '6px', padding: '10px 12px', marginBottom: '14px' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--gray-400)', marginBottom: '4px' }}>Notas</div>
+                  <div style={{ fontSize: '12.5px', color: 'var(--gray-700)', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>{selected.notas}</div>
+                </div>
+              )}
+
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button style={{ flex: 1, padding: '8px', background: '#F97316', color: 'white', border: 'none', borderRadius: '6px', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
                   {selected.estado === 'En Espera' ? 'Registrar OC' : 'Ver Inspecciones'}
                 </button>
-                <button style={{ padding: '8px 12px', background: 'white', border: '1px solid var(--gray-200)', borderRadius: '6px', fontSize: '12.5px', color: 'var(--gray-600)', cursor: 'pointer' }}>
+                <button onClick={() => { setNotasModal(true); setNotasText(selected.notas); }} style={{ padding: '8px 12px', background: 'white', border: '1px solid var(--gray-200)', borderRadius: '6px', fontSize: '12.5px', color: 'var(--gray-600)', cursor: 'pointer' }}>
                   Notas
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+        
+        {/* Modal de Notas */}
+        {notasModal && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }} onClick={() => setNotasModal(false)}>
+            <div style={{ background: 'white', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', width: '90%', maxWidth: '500px' }} onClick={e => e.stopPropagation()}>
+              <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--gray-200)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--gray-900)' }}>Editar Nota</div>
+                <button onClick={() => setNotasModal(false)} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: 'var(--gray-400)' }}>✕</button>
+              </div>
+              <div style={{ padding: '20px' }}>
+                <textarea 
+                  value={notasText} 
+                  onChange={e => setNotasText(e.target.value)}
+                  placeholder="Escribe una nota aquí..."
+                  style={{ width: '100%', height: '150px', padding: '10px', border: '1px solid var(--gray-300)', borderRadius: '6px', fontSize: '13px', fontFamily: 'inherit', resize: 'vertical' }}
+                />
+                <div style={{ display: 'flex', gap: '8px', marginTop: '16px' }}>
+                  <button onClick={() => setNotasModal(false)} style={{ flex: 1, padding: '8px', background: 'var(--gray-100)', border: '1px solid var(--gray-200)', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', color: 'var(--gray-600)' }}>
+                    Cancelar
+                  </button>
+                  <button onClick={() => {
+                    const newTickets = ticketsState.map(t => t.id === selected.id ? { ...t, notas: notasText } : t);
+                    setTicketsState(newTickets);
+                    setSelected({ ...selected, notas: notasText });
+                    setNotasModal(false);
+                  }} style={{ flex: 1, padding: '8px', background: '#059669', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
+                    Guardar Nota
+                  </button>
+                </div>
               </div>
             </div>
           </div>

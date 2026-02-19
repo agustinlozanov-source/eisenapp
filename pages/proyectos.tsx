@@ -1,4 +1,5 @@
 import Layout from '@/components/layout/Layout';
+import { useRouter } from 'next/router';
 import { useState } from 'react';
 
 const MONO = "ui-monospace, 'SF Mono', 'Cascadia Code', monospace";
@@ -63,6 +64,7 @@ const TABS = ['Todos', 'Activo', 'Bloqueado', 'Cerrado'];
 type Proyecto = typeof PROYECTOS[0];
 
 export default function Proyectos() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('Todos');
   const [selected, setSelected] = useState<Proyecto>(PROYECTOS[0]);
 
@@ -230,10 +232,10 @@ export default function Proyectos() {
               </div>
 
               <div style={{ display: 'flex', gap: '8px' }}>
-                <button style={{ flex: 1, padding: '8px', background: 'var(--gray-900)', color: 'white', border: 'none', borderRadius: '6px', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
+                <button onClick={() => router.push('/semanas?proyecto=' + selected.id)} style={{ flex: 1, padding: '8px', background: 'var(--gray-900)', color: 'white', border: 'none', borderRadius: '6px', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
                   Ver Semanas
                 </button>
-                <button style={{ padding: '8px 12px', background: 'white', border: '1px solid var(--gray-200)', borderRadius: '6px', fontSize: '12.5px', color: 'var(--gray-600)', cursor: 'pointer' }}>
+                <button onClick={() => router.push('/tickets?proyecto=' + selected.id)} style={{ padding: '8px 12px', background: 'white', border: '1px solid var(--gray-200)', borderRadius: '6px', fontSize: '12.5px', color: 'var(--gray-600)', cursor: 'pointer' }}>
                   Ver Tickets
                 </button>
               </div>

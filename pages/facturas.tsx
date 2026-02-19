@@ -1,5 +1,6 @@
 import Layout from '@/components/layout/Layout';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import { useState } from 'react';
 
 const MONO = "ui-monospace, 'SF Mono', 'Cascadia Code', monospace";
@@ -72,8 +73,12 @@ const TABS = ['Todas', 'Enviada', 'Vencida', 'Pagada'];
 type Factura = typeof FACTURAS[0];
 
 export default function Facturas() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('Todas');
   const [selected, setSelected] = useState<Factura>(FACTURAS[1]);
+  const [pagoModal, setPagoModal] = useState(false);
+  const [pagoForm, setPagoForm] = useState({ fecha: '2026-02-19', monto: '', metodo: 'Wire Transfer', referencia: '' });
+  const [facturasState, setFacturasState] = useState(FACTURAS);
 
   const filtered = FACTURAS.filter(f =>
     activeTab === 'Todas' ? true : f.estado === activeTab
@@ -255,13 +260,61 @@ export default function Facturas() {
 
               <div style={{ display: 'flex', gap: '8px' }}>
                 {selected.estado !== 'Pagada' && (
-                  <button style={{ flex: 1, padding: '8px', background: '#059669', color: 'white', border: 'none', borderRadius: '6px', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
+                  <button onClick={() => { setPagoForm({ fecha: '2026-02-19', monto: selected.total.replace(/[$,]/g, ''), metodo: 'Wire Transfer', referencia: '' }); setPagoModal(true); }} style={{ flex: 1, padding: '8px', background: '#059669', color: 'white', border: 'none', borderRadius: '6px', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
                     Registrar Pago
                   </button>
                 )}
                 <button style={{ flex: 1, padding: '8px', background: 'white', border: '1px solid var(--gray-200)', borderRadius: '6px', fontSize: '12.5px', color: 'var(--gray-600)', cursor: 'pointer' }}>
                   Ver PDF
                 </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal Registrar Pago */}
+        {pagoModal && (
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }} onClick={() => setPagoModal(false)}>
+            <div style={{ background: 'white', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', width: '90%', maxWidth: '500px' }} onClick={e => e.stopPropagation()}>
+              <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--gray-200)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--gray-900)' }}>Registrar Pago</div>
+                <button onClick={() => setPagoModal(false)} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: 'var(--gray-400)' }}>✕</button>
+              </div>
+              <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--gray-500)', marginBottom: '6px' }}>Fecha</label>
+                  <input type="date" value={pagoForm.fecha} onChange={e => setPagoForm({ ...pagoForm, fecha: e.target.value })} style={{ width: '100%', padding: '8px 10px', border: '1px solid var(--gray-300)', borderRadius: '6px', fontSize: '13px' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--gray-500)', marginBottom: '6px' }}>Monto</label>
+                  <input type="text" value={pagoForm.monto} onChange={e => setPagoForm({ ...pagoForm, monto: e.target.value })} style={{ width: '100%', padding: '8px 10px', border: '1px solid var(--gray-300)', borderRadius: '6px', fontSize: '13px' }} />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--gray-500)', marginBottom: '6px' }}>Método</label>
+                  <select value={pagoForm.metodo} onChange={e => setPagoForm({ ...pagoForm, metodo: e.target.value })} style={{ width: '100%', padding: '8px 10px', border: '1px solid var(--gray-300)', borderRadius: '6px', fontSize: '13px' }}>
+                    <option>Wire Transfer</option>
+                    <option>ACH</option>
+                    <option>Check</option>
+                    <option>Efectivo</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--gray-500)', marginBottom: '6px' }}>Referencia (Opcional)</label>
+                  <input type="text" value={pagoForm.referencia} onChange={e => setPagoForm({ ...pagoForm, referencia: e.target.value })} placeholder="Ej: WT-20260219" style={{ width: '100%', padding: '8px 10px', border: '1px solid var(--gray-300)', borderRadius: '6px', fontSize: '13px' }} />
+                </div>
+                <div style={{ display: 'flex', gap: '8px', marginTop: '8px' }}>
+                  <button onClick={() => setPagoModal(false)} style={{ flex: 1, padding: '8px', background: 'var(--gray-100)', border: '1px solid var(--gray-200)', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', color: 'var(--gray-600)' }}>
+                    Cancelar
+                  </button>
+                  <button onClick={() => {
+                    const newFacturas = facturasState.map(f => f.id === selected.id ? { ...f, estado: 'Pagada', ec: '#059669', eb: '#ECFDF5', pagos: [...f.pagos, { fecha: pagoForm.fecha, monto: '$' + pagoForm.monto, metodo: pagoForm.metodo }] } : f);
+                    setFacturasState(newFacturas);
+                    setSelected({ ...selected, estado: 'Pagada', ec: '#059669', eb: '#ECFDF5', pagos: [...selected.pagos, { fecha: pagoForm.fecha, monto: '$' + pagoForm.monto, metodo: pagoForm.metodo }] });
+                    setPagoModal(false);
+                  }} style={{ flex: 1, padding: '8px', background: '#059669', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
+                    Confirmar
+                  </button>
+                </div>
               </div>
             </div>
           </div>
