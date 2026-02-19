@@ -1,4 +1,5 @@
 import Layout from '@/components/layout/Layout';
+import Link from 'next/link';
 import { useState } from 'react';
 
 const MONO = "ui-monospace, 'SF Mono', 'Cascadia Code', monospace";
@@ -89,6 +90,9 @@ export default function Facturas() {
   return (
     <Layout title="Facturas">
 
+      <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "16px" }}>
+        <Link href="/facturas/nueva"><button style={{ padding: "7px 14px", background: "var(--gray-900)", color: "white", border: "none", borderRadius: "6px", fontSize: "13px", fontWeight: 500, cursor: "pointer" }}>+ Nueva Factura</button></Link>
+      </div>
       {/* KPIs */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '14px', marginBottom: '20px' }}>
         {[
