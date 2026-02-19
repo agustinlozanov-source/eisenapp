@@ -50,9 +50,23 @@ type Ticket = typeof TICKETS_DATA[0];
 
 export default function Tickets() {
   const [activeTab, setActiveTab] = useState('Todos');
+  const [tickets, setTickets] = useState(TICKETS_DATA);
   const [selected, setSelected] = useState<Ticket>(TICKETS_DATA[1]);
+  const [showModal, setShowModal] = useState(false);
+  const [ocInput, setOcInput] = useState('');
+  const [ocError, setOcError] = useState('');
 
-  const filtered = TICKETS_DATA.filter(t => {
+  const handleRegistrarOC = () => {
+    if (!ocInput.trim()) { setOcError('Ingresa el numero de OC'); return; }
+    const updated = tickets.map(t =>
+      t.id === selected.id ? { ...t, oc: ocInput.trim(), estado: 'En Proceso', ec: '#10B981', eb: '#ECFDF5' } : t
+    );
+    setTickets(updated);
+    setSelected(updated.find(t => t.id === selected.id)!);
+    setShowModal(false); setOcInput(''); setOcError('');
+  };
+
+  const filtered = tickets.filter(t => {
     if (activeTab === 'Todos') return true;
     return t.estado === activeTab;
   });
@@ -185,7 +199,7 @@ export default function Tickets() {
               </div>
 
               <div style={{ display: 'flex', gap: '8px' }}>
-                <button style={{ flex: 1, padding: '8px', background: '#F97316', color: 'white', border: 'none', borderRadius: '6px', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
+                <button onClick={() => { if (selected.estado === 'En Espera') setShowModal(true); }} style={{ flex: 1, padding: '8px', background: '#F97316', color: 'white', border: 'none', borderRadius: '6px', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
                   {selected.estado === 'En Espera' ? 'Registrar OC' : 'Ver Inspecciones'}
                 </button>
                 <button style={{ padding: '8px 12px', background: 'white', border: '1px solid var(--gray-200)', borderRadius: '6px', fontSize: '12.5px', color: 'var(--gray-600)', cursor: 'pointer' }}>
@@ -196,6 +210,22 @@ export default function Tickets() {
           </div>
         )}
       </div>
+
+      {showModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }} onClick={() => setShowModal(false)}>
+          <div onClick={e => e.stopPropagation()} style={{ background: 'white', borderRadius: '12px', padding: '28px', width: '400px', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' }}>
+            <div style={{ fontSize: '15px', fontWeight: 700, marginBottom: '4px' }}>Registrar OC</div>
+            <div style={{ fontSize: '13px', color: '#6B7280', marginBottom: '20px' }}>{selected?.id} - {selected?.cliente}</div>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: 500, marginBottom: '5px' }}>Numero de OC *</label>
+            <input value={ocInput} onChange={e => { setOcInput(e.target.value); setOcError(''); }} placeholder='PO-31764' autoFocus onKeyDown={e => { if (e.key === 'Enter') handleRegistrarOC(); }} style={{ width: '100%', padding: '9px 12px', border: ocError ? '1.5px solid #EF4444' : '1.5px solid #E5E7EB', borderRadius: '7px', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }} />
+            {ocError && <div style={{ fontSize: '11px', color: '#EF4444', marginTop: '3px' }}>{ocError}</div>}
+            <div style={{ display: 'flex', gap: '8px', marginTop: '20px' }}>
+              <button onClick={() => { setShowModal(false); setOcInput(''); }} style={{ flex: 1, padding: '9px', background: 'white', border: '1px solid #E5E7EB', borderRadius: '7px', cursor: 'pointer' }}>Cancelar</button>
+              <button onClick={handleRegistrarOC} style={{ flex: 1, padding: '9px', background: '#F97316', color: 'white', border: 'none', borderRadius: '7px', fontWeight: 600, cursor: 'pointer' }}>Registrar OC</button>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }
