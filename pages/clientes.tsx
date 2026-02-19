@@ -55,12 +55,7 @@ export default function Clientes() {
         <div style={{ fontSize: '13px', color: 'var(--gray-500)' }}>
           {CLIENTES.length} clientes registrados
         </div>
-        <button style={{
-          padding: '7px 14px', background: 'var(--gray-900)', color: 'white',
-          border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500,
-          cursor: 'pointer',
-        }}>
-          + Nuevo Cliente</button></Link>
+        <Link href='/clientes/nuevo'><button style={{ padding: '7px 14px', background: 'var(--gray-900)', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>+ Nuevo Cliente</button></Link>
       </div>
 
       {/* Search */}
