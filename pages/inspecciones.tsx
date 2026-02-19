@@ -1,5 +1,6 @@
 import Layout from '@/components/layout/Layout';
 import { useState } from 'react';
+import Link from 'next/link';
 
 const MONO = "ui-monospace, 'SF Mono', 'Cascadia Code', monospace";
 
@@ -111,9 +112,8 @@ export default function Inspecciones() {
         <div style={{ fontSize: '13px', color: 'var(--gray-500)' }}>
           {INSPECCIONES.length} inspecciones esta semana
         </div>
-        <button style={{ padding: '7px 14px', background: '#F97316', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
-          + Nueva Inspección
-        </button>
+        <Link href='/inspecciones/nueva'><button style={{ padding: '7px 14px', background: '#F97316', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
+          + Nueva Inspección</button></Link>
       </div>
 
       {/* Filtro proyecto */}
