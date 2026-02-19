@@ -150,9 +150,9 @@ export default function Inspecciones() {
               {/* Counts */}
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '8px', marginBottom: '16px' }}>
                 {[
-                  { label: 'Total',  value: selected.total.toLocaleString(), color: 'var(--gray-900)' },
-                  { label: 'OK',     value: selected.ok.toLocaleString(),    color: '#10B981' },
-                  { label: 'NOK',    value: selected.nok.toString(),         color: '#EF4444' },
+                  { label: 'Total',  value: (selected.total || 0).toLocaleString(), color: 'var(--gray-900)' },
+                  { label: 'OK',     value: (selected.ok || 0).toLocaleString(),    color: '#10B981' },
+                  { label: 'NOK',    value: String(selected.nok || 0),         color: '#EF4444' },
                 ].map(s => (
                   <div key={s.label} style={{ background: 'var(--gray-50)', borderRadius: '8px', padding: '10px', textAlign: 'center' }}>
                     <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--gray-400)', marginBottom: '4px' }}>{s.label}</div>
@@ -163,10 +163,10 @@ export default function Inspecciones() {
 
               {/* Fields */}
               {[
-                { label: 'Supervisor', value: selected.supervisor },
-                { label: 'Turno',      value: selected.turno },
-                { label: 'Tasa NOK',   value: selected.tasaNok, mono: true },
-                { label: 'Firma',      value: selected.firmado ? `✓ Firmado ${selected.horaFirma}` : 'Pendiente' },
+                { label: 'Supervisor', value: selected.supervisor || '—' },
+                { label: 'Turno',      value: selected.turno || '—' },
+                { label: 'Tasa NOK',   value: selected.tasaNok || '0%', mono: true },
+                { label: 'Firma',      value: selected.firmado ? `✓ Firmado ${selected.horaFirma || ''}` : 'Pendiente' },
               ].map(f => (
                 <div key={f.label} style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '8px', marginBottom: '8px', borderBottom: '1px solid var(--gray-50)' }}>
                   <span style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--gray-400)' }}>{f.label}</span>
@@ -177,7 +177,7 @@ export default function Inspecciones() {
               {/* Defectos */}
               <div style={{ marginTop: '8px', marginBottom: '14px' }}>
                 <div style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--gray-400)', marginBottom: '8px' }}>Defectos Encontrados</div>
-                {selected.defectos.map(d => (
+                {(selected.defectos || []).map(d => (
                   <div key={d.codigo} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#FEF2F2', borderRadius: '6px', padding: '8px 10px', marginBottom: '6px' }}>
                     <div>
                       <span style={{ fontFamily: MONO, fontSize: '11px', color: '#991B1B', fontWeight: 600 }}>{d.codigo}</span>
