@@ -1,6 +1,5 @@
 import Layout from '@/components/layout/Layout';
 import Link from 'next/link';
-import Link from 'next/link';
 import { useState } from 'react';
 
 const MONO = "ui-monospace, 'SF Mono', 'Cascadia Code', monospace";
