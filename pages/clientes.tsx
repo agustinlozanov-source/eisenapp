@@ -1,5 +1,6 @@
 import Layout from '@/components/layout/Layout';
 import Link from 'next/link';
+import Link from 'next/link';
 import { useState } from 'react';
 
 const MONO = "ui-monospace, 'SF Mono', 'Cascadia Code', monospace";
@@ -60,8 +61,7 @@ export default function Clientes() {
           border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500,
           cursor: 'pointer',
         }}>
-          + Nuevo Cliente
-        </button>
+          + Nuevo Cliente</button></Link>
       </div>
 
       {/* Search */}
