@@ -82,7 +82,7 @@ const FACTURAS = [
 ];
 
 const PAGOS = [
-  { id: 'PAG-001', factura: 'FAC-001', cliente: 'Eurospec Mfg.', proyecto: 'EM26-01', monto: 1600, fechaEsperada: '2026-03-11', estado: 'Pendiente', metodo: 'Wire Transfer' },
+  { id: 'PAG-001', factura: 'FAC-001', cliente: 'Eurospec Mfg.', proyecto: 'EM26-01', monto: '$1,600.00', fechaEsperada: '2026-03-11', estado: 'Pendiente', metodo: 'Wire Transfer' },
 ];
 
 export default function Seed() {

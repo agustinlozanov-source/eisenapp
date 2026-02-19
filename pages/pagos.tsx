@@ -48,17 +48,23 @@ export default function Pagos() {
     activeTab === 'Todos' ? true : p.estado === activeTab
   );
 
+  // Helper to safely convert monto to number
+  const getMontoAsNumber = (monto: string | number): number => {
+    if (typeof monto === 'number') return monto;
+    return parseFloat(String(monto).replace(/[$,]/g, '')) || 0;
+  };
+
   const totalCobrado = pagos
     .filter(p => p.estado === 'Confirmado')
-    .reduce((acc, p) => acc + parseFloat(p.monto.replace(/[$,]/g, '')), 0);
+    .reduce((acc, p) => acc + getMontoAsNumber(p.monto), 0);
 
   const totalPendiente = pagos
     .filter(p => p.estado === 'Pendiente')
-    .reduce((acc, p) => acc + parseFloat(p.monto.replace(/[$,]/g, '')), 0);
+    .reduce((acc, p) => acc + getMontoAsNumber(p.monto), 0);
 
   const totalVencido = pagos
     .filter(p => p.estado === 'Vencido')
-    .reduce((acc, p) => acc + parseFloat(p.monto.replace(/[$,]/g, '')), 0);
+    .reduce((acc, p) => acc + getMontoAsNumber(p.monto), 0);
 
   return (
     <Layout title="Pagos">
