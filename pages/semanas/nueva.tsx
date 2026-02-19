@@ -1,6 +1,8 @@
 import Layout from '@/components/layout/Layout';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
+import { db } from '@/lib/firebase';
+import { collection, addDoc } from 'firebase/firestore';
 
 const MONO = "ui-monospace, 'SF Mono', 'Cascadia Code', monospace";
 
@@ -59,9 +61,14 @@ export default function NuevaSemana() {
   const handleSubmit = async () => {
     if (!validate()) return;
     setLoading(true);
-    await new Promise(r => setTimeout(r, 800));
-    setLoading(false);
-    router.push('/semanas');
+    try {
+      await addDoc(collection(db, 'semanas'), { ...form, creadoEn: new Date().toISOString() });
+      setLoading(false);
+      router.push('/semanas');
+    } catch (error) {
+      console.error('Error:', error);
+      setLoading(false);
+    }
   };
 
   const inputStyle = (field: keyof FormData) => ({
