@@ -117,11 +117,11 @@ export default function Semanas() {
                 {/* Stats row */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '10px' }}>
                   {[
-                    { label: 'Días', value: s.diasTrabajados.toString() },
-                    { label: 'Horas', value: s.horasTotal.toString() },
-                    { label: 'Inspeccionadas', value: s.inspeccionadas.toLocaleString() },
-                    { label: 'NOK', value: s.nok.toString(), color: s.nok > 100 ? '#EF4444' : 'var(--gray-800)' },
-                    { label: 'Tasa NOK', value: s.tasaNok, color: parseFloat(s.tasaNok) > 1 ? '#F59E0B' : '#10B981' },
+                    { label: 'Días', value: String(s.diasTrabajados || 0) },
+                    { label: 'Horas', value: String(s.horasTotal || 0) },
+                    { label: 'Inspeccionadas', value: (s.inspeccionadas || 0).toLocaleString() },
+                    { label: 'NOK', value: String(s.nok || 0), color: (s.nok || 0) > 100 ? '#EF4444' : 'var(--gray-800)' },
+                    { label: 'Tasa NOK', value: s.tasaNok || '0%', color: parseFloat(s.tasaNok || '0%') > 1 ? '#F59E0B' : '#10B981' },
                   ].map(stat => (
                     <div key={stat.label} style={{ background: 'var(--gray-50)', borderRadius: '6px', padding: '8px 10px' }}>
                       <div style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--gray-400)', marginBottom: '3px' }}>{stat.label}</div>
@@ -182,16 +182,16 @@ export default function Semanas() {
 
             <div style={{ padding: '14px 18px' }}>
               {[
-                { label: 'Rango',       value: selected.rango },
-                { label: 'Planta',      value: selected.planta },
-                { label: 'Supervisor',  value: selected.supervisor },
-                { label: 'Días',        value: `${selected.diasTrabajados} días` },
-                { label: 'Horas',       value: `${selected.horasTotal} hrs` },
-                { label: 'Inspecc.',    value: selected.inspeccionadas.toLocaleString() + ' pzas' },
-                { label: 'OK',          value: selected.ok.toLocaleString() + ' pzas' },
-                { label: 'NOK',         value: selected.nok + ' pzas' },
-                { label: 'Tasa NOK',    value: selected.tasaNok },
-                { label: 'Monto',       value: selected.monto, mono: true },
+                { label: 'Rango',       value: selected.rango || '—' },
+                { label: 'Planta',      value: selected.planta || '—' },
+                { label: 'Supervisor',  value: selected.supervisor || '—' },
+                { label: 'Días',        value: `${selected.diasTrabajados || 0} días` },
+                { label: 'Horas',       value: `${selected.horasTotal || 0} hrs` },
+                { label: 'Inspecc.',    value: (selected.inspeccionadas || 0).toLocaleString() + ' pzas' },
+                { label: 'OK',          value: (selected.ok || 0).toLocaleString() + ' pzas' },
+                { label: 'NOK',         value: String(selected.nok || 0) + ' pzas' },
+                { label: 'Tasa NOK',    value: selected.tasaNok || '0%' },
+                { label: 'Monto',       value: selected.monto || '—', mono: true },
               ].map(f => (
                 <div key={f.label} style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '8px', marginBottom: '8px', borderBottom: '1px solid var(--gray-50)' }}>
                   <span style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--gray-400)' }}>{f.label}</span>
