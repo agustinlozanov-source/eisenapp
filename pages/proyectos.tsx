@@ -101,7 +101,7 @@ export default function Proyectos() {
       {/* Tabs */}
       <div style={{ display: 'flex', borderBottom: '1px solid var(--gray-200)', marginBottom: '16px' }}>
         {TABS.map(tab => {
-          const count = tab === 'Todos' ? PROYECTOS.length : PROYECTOS.filter(p => p.estado === tab).length;
+          const count = tab === 'Todos' ? proyectos.length : proyectos.filter(p => p.estado === tab).length;
           const isActive = activeTab === tab;
           return (
             <div key={tab} onClick={() => setActiveTab(tab)} style={{
