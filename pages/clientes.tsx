@@ -136,7 +136,7 @@ export default function Clientes() {
                     <div style={{ fontSize: '15px', fontWeight: 700, color: c.facturaPendiente !== '$0' ? '#EF4444' : 'var(--gray-900)' }}>{c.facturaPendiente}</div>
                   </div>
                 </div>
-                <button style={{
+                <button onClick={() => window.location.href = `/clientes?id=${c.id}`} style={{
                   fontSize: '12px', padding: '5px 12px',
                   background: 'white', border: '1px solid var(--gray-200)',
                   borderRadius: '6px', color: 'var(--gray-700)', cursor: 'pointer',

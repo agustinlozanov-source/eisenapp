@@ -54,7 +54,7 @@ export default function Inspecciones() {
         <div style={{ fontSize: '13px', color: 'var(--gray-500)' }}>
           {inspecciones.length} inspecciones esta semana
         </div>
-        <button style={{ padding: '7px 14px', background: '#F97316', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
+        <button onClick={() => window.location.href = '/inspecciones/nueva'} style={{ padding: '7px 14px', background: '#F97316', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
           + Nueva Inspección
         </button>
       </div>

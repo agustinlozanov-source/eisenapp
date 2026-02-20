@@ -237,7 +237,7 @@ export default function Facturas() {
                     Registrar Pago
                   </button>
                 )}
-                <button style={{ flex: 1, padding: '8px', background: 'white', border: '1px solid var(--gray-200)', borderRadius: '6px', fontSize: '12.5px', color: 'var(--gray-600)', cursor: 'pointer' }}>
+                <button onClick={() => alert('Funcionalidad de visualización de PDF próximamente')} style={{ flex: 1, padding: '8px', background: 'white', border: '1px solid var(--gray-200)', borderRadius: '6px', fontSize: '12.5px', color: 'var(--gray-600)', cursor: 'pointer' }}>
                   Ver PDF
                 </button>
               </div>

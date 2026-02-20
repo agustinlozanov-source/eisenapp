@@ -236,7 +236,7 @@ export default function Cumplimiento() {
               {/* Action */}
               <div style={{ marginTop: '14px' }}>
                 {selected.estado === 'Incompleto' ? (
-                  <button style={{ width: '100%', padding: '9px', background: '#F97316', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
+                  <button onClick={() => alert('Funcionalidad de carga de documentos próximamente')} style={{ width: '100%', padding: '9px', background: '#F97316', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
                     Subir Documentos Faltantes
                   </button>
                 ) : (
