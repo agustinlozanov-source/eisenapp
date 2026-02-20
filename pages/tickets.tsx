@@ -1,4 +1,5 @@
 import Layout from '@/components/layout/Layout';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
@@ -68,9 +69,9 @@ export default function Tickets() {
         <div style={{ fontSize: '13px', color: 'var(--gray-500)' }}>
           {tickets.length} tickets activos
         </div>
-        <button style={{ padding: '7px 14px', background: 'var(--gray-900)', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
+        <Link href='/tickets/nuevo'><button style={{ padding: '7px 14px', background: 'var(--gray-900)', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer' }}>
           + Nuevo Ticket
-        </button>
+        </button></Link>
       </div>
 
       {/* Tabs */}

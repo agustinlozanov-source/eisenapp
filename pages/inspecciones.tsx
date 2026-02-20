@@ -29,6 +29,7 @@ export default function Inspecciones() {
   const [inspecciones, setInspecciones] = useState<Inspeccion[]>([]);
   const [selected, setSelected] = useState<Inspeccion | null>(null);
   const [filtroProyecto, setFiltroProyecto] = useState('Todos');
+  const [showReporte, setShowReporte] = useState(false);
 
   useEffect(() => {
     const unsub = onSnapshot(collection(db, 'inspecciones'), (snap) => {
@@ -196,13 +197,96 @@ export default function Inspecciones() {
                 </div>
               )}
 
-              <button style={{ width: '100%', padding: '8px', background: 'var(--gray-900)', color: 'white', border: 'none', borderRadius: '6px', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
+              <button onClick={() => setShowReporte(true)} style={{ width: '100%', padding: '8px', background: 'var(--gray-900)', color: 'white', border: 'none', borderRadius: '6px', fontSize: '12.5px', fontWeight: 500, cursor: 'pointer' }}>
                 Ver Reporte Completo
               </button>
             </div>
           </div>
         )}
       </div>
+
+      {/* Modal Reporte Completo */}
+      {showReporte && selected && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }} onClick={() => setShowReporte(false)}>
+          <div style={{ background: 'white', borderRadius: '10px', overflow: 'hidden', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)', width: '90%', maxWidth: '600px', maxHeight: '80vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
+            <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--gray-200)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div style={{ fontSize: '16px', fontWeight: 600, color: 'var(--gray-900)' }}>Reporte Completo</div>
+              <button onClick={() => setShowReporte(false)} style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', color: 'var(--gray-400)' }}>✕</button>
+            </div>
+            <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              {/* ID y Fecha */}
+              <div>
+                <div style={{ fontSize: '12px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--gray-500)', marginBottom: '4px' }}>Identificación</div>
+                <div style={{ fontSize: '13px', color: 'var(--gray-800)', fontFamily: MONO }}>ID: {selected.id}</div>
+                <div style={{ fontSize: '13px', color: 'var(--gray-800)' }}>Fecha: {selected.fecha}</div>
+              </div>
+
+              {/* Supervisor y Turno */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <div style={{ fontSize: '12px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--gray-500)', marginBottom: '4px' }}>Supervisor</div>
+                  <div style={{ fontSize: '13px', color: 'var(--gray-800)' }}>{selected.supervisor || '—'}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '12px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--gray-500)', marginBottom: '4px' }}>Turno</div>
+                  <div style={{ fontSize: '13px', color: 'var(--gray-800)' }}>{selected.turno || '—'}</div>
+                </div>
+              </div>
+
+              {/* Conteos */}
+              <div style={{ background: 'var(--gray-50)', borderRadius: '8px', padding: '12px', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px' }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--gray-500)', marginBottom: '4px' }}>Total</div>
+                  <div style={{ fontSize: '18px', fontWeight: 700, color: 'var(--gray-900)', fontFamily: MONO }}>{selected.total || 0}</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--gray-500)', marginBottom: '4px' }}>OK</div>
+                  <div style={{ fontSize: '18px', fontWeight: 700, color: '#10B981', fontFamily: MONO }}>{selected.ok || 0}</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--gray-500)', marginBottom: '4px' }}>NOK</div>
+                  <div style={{ fontSize: '18px', fontWeight: 700, color: '#EF4444', fontFamily: MONO }}>{selected.nok || 0}</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '11px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--gray-500)', marginBottom: '4px' }}>Tasa</div>
+                  <div style={{ fontSize: '18px', fontWeight: 700, color: '#F59E0B', fontFamily: MONO }}>{selected.tasaNok || '0%'}</div>
+                </div>
+              </div>
+
+              {/* Defectos */}
+              {(selected.defectos || []).length > 0 && (
+                <div>
+                  <div style={{ fontSize: '12px', fontWeight: 500, textTransform: 'uppercase', color: 'var(--gray-500)', marginBottom: '8px' }}>Defectos Encontrados</div>
+                  {(selected.defectos || []).map(d => (
+                    <div key={d.codigo} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#FEF2F2', borderRadius: '6px', padding: '8px 10px', marginBottom: '6px' }}>
+                      <div>
+                        <span style={{ fontFamily: MONO, fontSize: '11px', color: '#991B1B', fontWeight: 600 }}>{d.codigo}</span>
+                        <span style={{ fontSize: '12.5px', color: 'var(--gray-700)', marginLeft: '8px' }}>{d.descripcion}</span>
+                      </div>
+                      <span style={{ fontFamily: MONO, fontSize: '13px', fontWeight: 700, color: '#EF4444' }}>{d.cantidad}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Estado Firma */}
+              <div style={{ background: selected.firmado ? '#ECFDF5' : '#FEF2F2', borderRadius: '8px', padding: '12px', border: `1px solid ${selected.firmado ? '#BBF7D0' : '#FECACA'}` }}>
+                <div style={{ fontSize: '12px', fontWeight: 500, textTransform: 'uppercase', color: selected.firmado ? '#065F46' : '#991B1B', marginBottom: '4px' }}>
+                  {selected.firmado ? '✓ Firmado' : '✗ Pendiente de Firma'}
+                </div>
+                {selected.firmado && selected.horaFirma && (
+                  <div style={{ fontSize: '13px', color: selected.firmado ? '#065F46' : '#991B1B' }}>Hora: {selected.horaFirma}</div>
+                )}
+              </div>
+
+              {/* Botón Cerrar */}
+              <button onClick={() => setShowReporte(false)} style={{ padding: '10px', background: 'var(--gray-100)', border: '1px solid var(--gray-200)', borderRadius: '6px', fontSize: '13px', fontWeight: 500, cursor: 'pointer', color: 'var(--gray-600)' }}>
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 }
