@@ -1,4 +1,5 @@
 import Layout from '@/components/layout/Layout';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 
@@ -75,8 +76,9 @@ export default function Proyectos() {
   return (
     <Layout title="Proyectos">
 
-      {/* KPIs */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '14px', marginBottom: '20px' }}>
+      {/* Header con KPIs y botón */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', gap: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '14px', flex: 1 }}>
         {[
           { label: 'Proyectos Activos',  value: PROYECTOS.filter(p => p.estado === 'Activo').length.toString(),    color: '#10B981' },
           { label: 'Bloqueados',         value: PROYECTOS.filter(p => p.estado === 'Bloqueado').length.toString(), color: '#EF4444' },
@@ -89,6 +91,12 @@ export default function Proyectos() {
             <div style={{ fontSize: '26px', fontWeight: 700, color: k.color, letterSpacing: '-0.5px', fontFamily: MONO }}>{k.value}</div>
           </div>
         ))}
+        </div>
+        <Link href='/proyectos/nuevo'>
+          <button style={{ padding: '10px 16px', background: 'var(--gray-900)', color: 'white', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', marginTop: '2px' }}>
+            + Nuevo Proyecto
+          </button>
+        </Link>
       </div>
 
       {/* Tabs */}
