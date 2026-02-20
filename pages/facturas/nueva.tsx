@@ -84,7 +84,13 @@ export default function NuevaFactura() {
     if (!validate()) return;
     setLoading(true);
     try {
-      await addDoc(collection(db, 'facturas'), { ...form, creadoEn: new Date().toISOString() });
+      await addDoc(collection(db, 'facturas'), {
+        ...form,
+        total: subtotal,
+        estado: 'Enviada',
+        fechaVencimiento: fechaVencimiento(),
+        creadoEn: new Date().toISOString(),
+      });
       setLoading(false);
       router.push('/facturas');
     } catch (error) {

@@ -62,7 +62,12 @@ export default function NuevaSemana() {
     if (!validate()) return;
     setLoading(true);
     try {
-      await addDoc(collection(db, 'semanas'), { ...form, creadoEn: new Date().toISOString() });
+      await addDoc(collection(db, 'semanas'), {
+        ...form,
+        total,
+        estado: 'Lista para Facturar',
+        creadoEn: new Date().toISOString(),
+      });
       setLoading(false);
       router.push('/semanas');
     } catch (error) {

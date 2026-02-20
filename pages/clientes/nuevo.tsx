@@ -52,7 +52,11 @@ export default function NuevoCliente() {
     if (!validate()) return;
     setLoading(true);
     try {
-      await addDoc(collection(db, 'clientes'), { ...form, creadoEn: new Date().toISOString() });
+      await addDoc(collection(db, 'clientes'), {
+        ...form,
+        estado: 'Activo',
+        creadoEn: new Date().toISOString(),
+      });
       setLoading(false);
       router.push('/clientes');
     } catch (error) {

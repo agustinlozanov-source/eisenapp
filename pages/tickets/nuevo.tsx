@@ -79,7 +79,13 @@ export default function NuevoTicket() {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      await addDoc(collection(db, 'tickets'), { ...form, creadoEn: new Date().toISOString() });
+      await addDoc(collection(db, 'tickets'), {
+        ...form,
+        estado: 'En Proceso',
+        ec: '#10B981',
+        eb: '#ECFDF5',
+        creadoEn: new Date().toISOString(),
+      });
       setLoading(false);
       router.push('/tickets');
     } catch (error) {

@@ -82,7 +82,13 @@ export default function NuevaInspeccion() {
   const handleSubmit = async () => {
     setLoading(true);
     try {
-      await addDoc(collection(db, 'inspecciones'), { ...form, creadoEn: new Date().toISOString() });
+      await addDoc(collection(db, 'inspecciones'), {
+        ...form,
+        defectos,
+        nok,
+        tasaNok,
+        creadoEn: new Date().toISOString(),
+      });
       setLoading(false);
       router.push('/inspecciones');
     } catch (error) {
