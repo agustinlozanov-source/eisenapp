@@ -1,75 +1,74 @@
 import Layout from '@/components/layout/Layout';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { db } from '@/lib/firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
 
 const MONO = "ui-monospace, 'SF Mono', 'Cascadia Code', monospace";
 
-const PROYECTOS = [
-  {
-    id: 'EM26-01',
-    nombre: 'Missing Tabs — Mal Troquelado',
-    cliente: 'Eurospec Mfg.',
-    contacto: 'James Whitfield',
-    planta: 'Fisher Dynamics',
-    ciudad: 'Newmarket, ON',
-    parte: '195364',
-    lote: '02226',
-    qty: '9,720',
-    tarifa: '$40/hr',
-    inicio: '2026-02-10',
-    semanaInicio: 'Sem 06',
-    semanaActual: 'Sem 07',
-    semanasActivas: 2,
-    horasTotal: 80,
-    facturado: '$3,200',
-    cobrado: '$1,600',
-    pendiente: '$1,600',
-    estado: 'Activo',
-    ec: '#059669',
-    eb: '#ECFDF5',
-    supervisor: 'A. Serrano',
-    oc: '',
-    descripcion: 'Inspección 100% de piezas con tabs faltantes detectadas en línea de producción. Sorting en planta Fisher Dynamics Newmarket.',
-  },
-  {
-    id: 'RD26-01',
-    nombre: 'Metal Split — Bkt Reinforcement',
-    cliente: 'Ranger Die Inc.',
-    contacto: 'Bob Ranger',
-    planta: 'Adient',
-    ciudad: 'Matamoros, MX',
-    parte: '3232903',
-    lote: '32825',
-    qty: '6,290',
-    tarifa: '$40/hr',
-    inicio: '2026-02-12',
-    semanaInicio: 'Sem 07',
-    semanaActual: 'Sem 07',
-    semanasActivas: 1,
-    horasTotal: 40,
-    facturado: '$1,600',
-    cobrado: '$0',
-    pendiente: '$1,600',
-    estado: 'Bloqueado',
-    ec: '#DC2626',
-    eb: '#FEF2F2',
-    supervisor: 'O. Pech',
-    oc: 'PO-31764',
-    descripcion: 'Metal split en bracket de refuerzo. Lote en warehouse pendiente de disposición. OC registrada, pendiente POD y firma.',
-  },
-];
-
 const TABS = ['Todos', 'Activo', 'Bloqueado', 'Cerrado'];
 
-type Proyecto = typeof PROYECTOS[0];
+interface Proyecto {
+  id: string;
+  nombre: string;
+  cliente: string;
+  contacto?: string;
+  planta: string;
+  ciudad: string;
+  parte: string;
+  lote: string;
+  cantidad?: string;
+  qty?: string;
+  tarifa: string;
+  inicio: string;
+  semanaInicio?: string;
+  semanaActual?: string;
+  semanasActivas?: number;
+  horasTotal?: number;
+  facturado?: string;
+  cobrado?: string;
+  pendiente?: string;
+  estado: string;
+  ec?: string;
+  eb?: string;
+  supervisor: string;
+  oc?: string;
+  notas?: string;
+  descripcion?: string;
+  creadoEn?: string;
+}
 
 export default function Proyectos() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState('Todos');
-  const [selected, setSelected] = useState<Proyecto>(PROYECTOS[0]);
+  const [proyectos, setProyectos] = useState<Proyecto[]>([]);
+  const [selected, setSelected] = useState<Proyecto | null>(null);
 
-  const filtered = PROYECTOS.filter(p =>
+  useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'proyectos'), (snap) => {
+      const data = snap.docs.map(d => {
+        const proyecto = { id: d.id, ...d.data() } as Proyecto;
+        // Asegurar que todos los campos requeridos tengan valores por defecto
+        return {
+          ...proyecto,
+          ec: proyecto.ec || '#059669',
+          eb: proyecto.eb || '#ECFDF5',
+          contacto: proyecto.contacto || proyecto.cliente,
+          semanasActivas: proyecto.semanasActivas || 1,
+          horasTotal: proyecto.horasTotal || 0,
+          facturado: proyecto.facturado || '$0',
+          cobrado: proyecto.cobrado || '$0',
+          pendiente: proyecto.pendiente || '$0',
+        };
+      });
+      setProyectos(data);
+      setSelected(prev => prev ? data.find(p => p.id === prev.id) || data[0] : data[0]);
+    });
+    return () => unsub();
+  }, []);
+
+  const filtered = proyectos.filter(p =>
     activeTab === 'Todos' ? true : p.estado === activeTab
   );
 
@@ -80,8 +79,8 @@ export default function Proyectos() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px', gap: '16px' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '14px', flex: 1 }}>
         {[
-          { label: 'Proyectos Activos',  value: PROYECTOS.filter(p => p.estado === 'Activo').length.toString(),    color: '#10B981' },
-          { label: 'Bloqueados',         value: PROYECTOS.filter(p => p.estado === 'Bloqueado').length.toString(), color: '#EF4444' },
+          { label: 'Proyectos Activos',  value: proyectos.filter(p => p.estado === 'Activo').length.toString(),    color: '#10B981' },
+          { label: 'Bloqueados',         value: proyectos.filter(p => p.estado === 'Bloqueado').length.toString(), color: '#EF4444' },
           { label: 'Total Facturado',    value: '$4,800',  color: '#3B82F6' },
           { label: 'Total Pendiente',    value: '$3,200',  color: '#F59E0B' },
         ].map((k, i) => (

@@ -36,18 +36,32 @@ export default function NuevoProyecto() {
 
     setLoading(true);
     try {
+      const today = new Date().toISOString().split('T')[0];
+      
       await addDoc(collection(db, 'proyectos'), {
         ...form,
         estado: 'Activo',
         ec: '#059669',
         eb: '#ECFDF5',
+        nombre: `${form.parte ? form.parte + ' — ' : ''}${form.cliente}`,
+        contacto: form.cliente,
+        semanasActivas: 1,
+        horasTotal: 0,
+        facturado: '$0',
+        cobrado: '$0',
+        pendiente: '$0',
+        inicio: today,
+        semanaInicio: 'Sem 08',
+        semanaActual: 'Sem 08',
+        oc: '',
         creadoEn: new Date().toISOString(),
       });
 
+      alert('Proyecto creado exitosamente');
       router.push('/proyectos');
     } catch (error) {
       console.error('Error al crear proyecto:', error);
-      alert('Error al crear proyecto');
+      alert('Error al crear proyecto: ' + error);
     } finally {
       setLoading(false);
     }
